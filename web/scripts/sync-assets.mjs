@@ -2,6 +2,9 @@
 /**
  * Read-only sync: assert/ → web/public/
  * Never mutates docs/ or assert/.
+ * 1) copy full image sheets + music
+ * 2) crop NFC/poster/hero (no zip)
+ * 3) process assert/zip manual slices → slices/ parts/ crop aliases
  */
 import fs from "fs";
 import path from "path";
@@ -44,6 +47,11 @@ function copyFile(src, dest) {
   console.log("✓", path.relative(ROOT, dest));
 }
 
+function run(cmd, args, opts = {}) {
+  const result = spawnSync(cmd, args, { stdio: "inherit", ...opts });
+  if (result.status !== 0) process.exit(result.status || 1);
+}
+
 ensureDir(OUT_IMG);
 ensureDir(OUT_AUD);
 
@@ -65,7 +73,9 @@ for (const [srcName, destName] of MUSIC_MAP) {
 
 console.log("\nAsset sync complete (sources untouched).");
 
-const crop = spawnSync("node", [path.join(__dirname, "crop-assets.mjs")], {
-  stdio: "inherit",
-});
-if (crop.status !== 0) process.exit(crop.status || 1);
+run("node", [path.join(__dirname, "crop-assets.mjs")]);
+
+const venvPy = "/tmp/qdqc-venv/bin/python";
+const sysPy = "python3";
+const py = fs.existsSync(venvPy) ? venvPy : sysPy;
+run(py, [path.join(__dirname, "process-zip-assets.py")]);

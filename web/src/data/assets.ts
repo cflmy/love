@@ -35,7 +35,7 @@ export const images = {
   uiMobile: "/media/image/22.png",
 } as const;
 
-/** Cropped single-asset stills from multi-panel sheets (scripts/crop-assets.mjs). */
+/** Cropped / sliced stills. Zip slices rewrite most entries; NFC/poster/hero from crop-assets. */
 export const crops = {
   nfcFront: "/media/crops/nfc-front.webp",
   nfcBack: "/media/crops/nfc-back.webp",
@@ -54,6 +54,9 @@ export const crops = {
   magpieHero: "/media/crops/magpie-hero.webp",
   magpieSpread: "/media/crops/magpie-spread.webp",
   magpieFlight: "/media/crops/magpie-flight.webp",
+  magpieSide: "/media/crops/magpie-side.webp",
+  magpiePerch: "/media/crops/magpie-perch.webp",
+  magpieBack: "/media/crops/magpie-back.webp",
   bridgeNight: "/media/crops/bridge-night.webp",
   bridgeMorning: "/media/crops/bridge-morning.webp",
   bridgeDusk: "/media/crops/bridge-dusk.webp",
@@ -108,6 +111,53 @@ export const crops = {
   storyQuietTea: "/media/crops/story-quiet-tea.webp",
   storyLetter: "/media/crops/story-letter.webp",
   storyCoda: "/media/crops/story-coda.webp",
+} as const;
+
+/** Flight / element frames from zip connectivity / column splits (transparent). */
+export const parts = {
+  butterflyFlight: [
+    "/media/parts/butterfly-flight-01.webp",
+    "/media/parts/butterfly-flight-02.webp",
+    "/media/parts/butterfly-flight-03.webp",
+    "/media/parts/butterfly-flight-04.webp",
+    "/media/parts/butterfly-flight-05.webp",
+  ],
+  magpieFlight: [
+    "/media/parts/magpie-flight-01.webp",
+    "/media/parts/magpie-flight-02.webp",
+    "/media/parts/magpie-flight-03.webp",
+    "/media/parts/magpie-flight-04.webp",
+    "/media/parts/magpie-flight-05.webp",
+    "/media/parts/magpie-flight-06.webp",
+  ],
+  butterflyElements: Array.from(
+    { length: 14 },
+    (_, i) => `/media/parts/butterfly-element-${String(i + 1).padStart(2, "0")}.webp`,
+  ),
+  magpieElements: Array.from(
+    { length: 14 },
+    (_, i) => `/media/parts/magpie-element-${String(i + 1).padStart(2, "0")}.webp`,
+  ),
+} as const;
+
+/** Manual zip slice roots (full tile sets). Prefer `crops` / `parts` in UI. */
+export const slices = {
+  logo: "/media/slices/001",
+  brand: "/media/slices/002",
+  butterfly: "/media/slices/008",
+  magpie: "/media/slices/009",
+  bridge: "/media/slices/010",
+  meeting: "/media/slices/012",
+  past: "/media/slices/13",
+  present: "/media/slices/14",
+  days: "/media/slices/15",
+  journey: "/media/slices/16",
+  myth: "/media/slices/17",
+  storyboard: "/media/slices/18",
+  uiDesktop: "/media/slices/19",
+  uiKit: "/media/slices/20",
+  uiExtra: "/media/slices/21",
+  uiMobile: "/media/slices/22",
 } as const;
 
 export const audio = {

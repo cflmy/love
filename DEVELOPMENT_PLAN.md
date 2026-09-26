@@ -82,7 +82,7 @@ web/
 | 14 / 15 | 今世记忆章节板 |
 | 19–22 | Desktop / Mobile UI Kit、组件规范 |
 
-实施策略：板式图作 **设计母版**；实现时用脚本裁切/导出图层到 `web/public/media/`，源文件不动。首版可先用整图 + CSS mask / crop 达成高质感，再逐步抽透明层。
+实施策略：优先使用 `assert/zip/` 手动切图（经 `process-zip-assets.py` 导出到 `web/public/media/slices` / `parts`，并回写 `crops` 别名）。无 zip 的 NFC/海报/Hero 仍用 `crop-assets.mjs`。`assert/` 源文件只读、不删。手动切边瑕疵：透明层 chroma-key + 连通域/列切；场景板用轻微 CSS scale 遮盖接缝。
 
 ### 3.2 音乐 `assert/music/`（实为 AAC/M4A）
 

@@ -611,6 +611,8 @@ body {
 
 .scene-beat__img {
   object-fit: cover;
+  transform: scale(1.025);
+  filter: contrast(1.02) saturate(1.04);
 }
 
 .scene-beat__copy {
@@ -773,6 +775,7 @@ body {
 .journey-pane__img {
   object-fit: cover;
   opacity: 0.45;
+  transform: scale(1.03);
 }
 
 .journey-pane > *:not(.journey-pane__photo):not(.journey-path) {
@@ -1112,6 +1115,7 @@ body {
 
 .memory-card__img {
   object-fit: cover;
+  transform: scale(1.03);
 }
 
 .memory-card__date {
@@ -1156,6 +1160,7 @@ body {
 
 .quiet-days__img {
   object-fit: cover;
+  transform: scale(1.02);
 }
 
 .quiet-days__window {

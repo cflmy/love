@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float, useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { crops } from "@/data/assets";
+import { crops, parts } from "@/data/assets";
 import { chapterProgressBounds } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
 
@@ -242,17 +242,20 @@ function Petals({ density }: { density: number }) {
 
 function Butterfly() {
   const group = useRef<THREE.Group>(null);
-  const wingL = useRef<THREE.Mesh>(null);
-  const wingR = useRef<THREE.Mesh>(null);
+  const mat = useRef<THREE.MeshBasicMaterial>(null);
   const meet = useChapterLocal("meeting");
   const reveal = useStoryStore((s) => s.worldReveal);
+  const textures = useTexture([...parts.butterflyFlight]);
+  textures.forEach((t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
 
   useFrame(({ clock }) => {
-    if (!group.current || !wingL.current || !wingR.current) return;
+    if (!group.current || !mat.current) return;
     const t = clock.elapsedTime;
-    const flap = Math.sin(t * 9) * 0.5;
-    wingL.current.rotation.y = -0.75 + flap;
-    wingR.current.rotation.y = 0.75 - flap;
+    const frame = Math.floor(t * 10) % textures.length;
+    mat.current.map = textures[frame];
+    mat.current.needsUpdate = true;
 
     const x = THREE.MathUtils.lerp(3.6, 0.35, THREE.MathUtils.smoothstep(meet, 0, 0.72));
     const z = THREE.MathUtils.lerp(1.2, -1.0, THREE.MathUtils.smoothstep(meet, 0.1, 0.8));
@@ -260,34 +263,22 @@ function Butterfly() {
     group.current.position.set(x + Math.sin(t * 0.6) * 0.08, y, z);
     group.current.rotation.y = -0.55 - meet * 0.35;
     group.current.visible = reveal > 0.2 && meet < 0.98;
-    group.current.scale.setScalar(0.28 + reveal * 0.1);
+    group.current.scale.setScalar(0.55 + reveal * 0.15);
   });
 
-  const wingMat = (
-    <meshStandardMaterial
-      color="#4E83B5"
-      emissive="#4E83B5"
-      emissiveIntensity={0.4}
-      transparent
-      opacity={0.88}
-      side={THREE.DoubleSide}
-    />
-  );
-
   return (
-    <Float speed={2.2} rotationIntensity={0.15} floatIntensity={0.25}>
-      <group ref={group} scale={0.35}>
-        <mesh ref={wingL} position={[-0.35, 0, 0]}>
-          <planeGeometry args={[0.7, 0.95]} />
-          {wingMat}
-        </mesh>
-        <mesh ref={wingR} position={[0.35, 0, 0]}>
-          <planeGeometry args={[0.7, 0.95]} />
-          {wingMat}
-        </mesh>
+    <Float speed={2.2} rotationIntensity={0.12} floatIntensity={0.22}>
+      <group ref={group}>
         <mesh>
-          <capsuleGeometry args={[0.05, 0.35, 4, 8]} />
-          <meshStandardMaterial color="#172B49" />
+          <planeGeometry args={[1.1, 0.7]} />
+          <meshBasicMaterial
+            ref={mat}
+            map={textures[0]}
+            transparent
+            depthWrite={false}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
         </mesh>
       </group>
     </Float>
@@ -296,33 +287,40 @@ function Butterfly() {
 
 function Magpie() {
   const ref = useRef<THREE.Group>(null);
+  const mat = useRef<THREE.MeshBasicMaterial>(null);
   const meet = useChapterLocal("meeting");
+  const textures = useTexture([...parts.magpieFlight]);
+  textures.forEach((t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
 
   useFrame(({ clock }) => {
-    if (!ref.current) return;
+    if (!ref.current || !mat.current) return;
     const appear = THREE.MathUtils.smoothstep(meet, 0.22, 0.45);
     const t = clock.elapsedTime;
+    const frame = Math.floor(t * 9) % textures.length;
+    mat.current.map = textures[frame];
+    mat.current.needsUpdate = true;
     ref.current.visible = appear > 0.02 && meet < 0.98;
     const x = THREE.MathUtils.lerp(-3.8, -0.25, THREE.MathUtils.smoothstep(meet, 0.22, 0.78));
     const z = THREE.MathUtils.lerp(0.9, -1.05, THREE.MathUtils.smoothstep(meet, 0.28, 0.82));
     ref.current.position.set(x + Math.sin(t * 0.5) * 0.08, 0.7 + Math.cos(t * 0.9) * 0.08, z);
     ref.current.rotation.y = 0.55 + meet * 0.35;
-    ref.current.scale.setScalar(0.22 + appear * 0.08);
+    ref.current.scale.setScalar(0.48 + appear * 0.12);
   });
 
   return (
-    <group ref={ref} scale={0.28}>
+    <group ref={ref}>
       <mesh>
-        <sphereGeometry args={[0.28, 16, 16]} />
-        <meshStandardMaterial color="#101820" metalness={0.45} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.35, 0.05, 0]} rotation={[0, 0, -0.4]}>
-        <coneGeometry args={[0.12, 0.55, 8]} />
-        <meshStandardMaterial color="#4E83B5" emissive="#4E83B5" emissiveIntensity={0.25} />
-      </mesh>
-      <mesh position={[-0.15, 0.05, 0.05]} rotation={[0.2, 0, 0.6]}>
-        <planeGeometry args={[0.9, 0.35]} />
-        <meshStandardMaterial color="#6F8FB7" side={THREE.DoubleSide} transparent opacity={0.88} />
+        <planeGeometry args={[1.2, 0.75]} />
+        <meshBasicMaterial
+          ref={mat}
+          map={textures[0]}
+          transparent
+          depthWrite={false}
+          side={THREE.DoubleSide}
+          toneMapped={false}
+        />
       </mesh>
     </group>
   );

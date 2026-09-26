@@ -8,25 +8,33 @@ alwaysApply: false
 
 ## Source of truth
 
-- Raw files: `assert/image/*.png`, `assert/music/*.mp4` (actually AAC/M4A audio).
+- Raw sheets: `assert/image/*.png` (never edit / never delete).
+- Manual slices: `assert/zip/*.zip` (Photoshop Save-for-Web cuts; never delete).
 - App consumes copies under `web/public/` only.
 - Registry: `web/src/data/assets.ts` maps id → path → chapter → role.
 
-## Image map (sheet → role)
+## Pipeline (`npm run sync:assets`)
 
-| File | Role |
+1. Copy `assert/image` → `web/public/media/image` and music → `audio/`.
+2. `crop-assets.mjs` — only NFC / posters / heroes **without** zip (`003`–`007`, `011`).
+3. `process-zip-assets.py` — extract `assert/zip` → `media/slices/`, chroma-key cream/dark UI sheets, connectivity / column-split multi-component rows → `media/parts/`, rewrite matching `media/crops/*.webp` aliases.
+
+Manual cuts may leave fringe: prefer transparent `parts/` sprites; for scene panels, slight CSS scale / soft mask is OK. Do not re-introduce fractional crops of multi-panel sheets.
+
+## Image map
+
+| Source | Role |
 | --- | --- |
-| `001`–`002` | Logo / brand mark variants |
-| `003`–`006` | NFC card + character posters |
-| `007` `011` | Desktop / ending hero references |
-| `008` | Butterfly poses + flight sequence |
-| `009` | Magpie poses + flight sequence |
-| `010` | Magpie bridge layers / times of day |
-| `012`–`13` `16`–`18` | Storyboard / scene boards |
-| `14` `15` | Present-life memory chapters |
-| `19`–`22` | UI kit (desktop + mobile) |
+| `001`–`002` zip | Logo / brand mark tiles |
+| `003`–`006` sheets | NFC card + character posters (crop script) |
+| `007` `011` sheets | Desktop / ending heroes (crop script) |
+| `008` zip | Butterfly hero + poses + flight / elements |
+| `009` zip | Magpie hero + poses + flight / elements |
+| `010` zip | Magpie bridge + day variants + icons |
+| `012`–`18` zip | Storyboard / chapter panels |
+| `19`–`22` zip | UI kit (desktop + mobile) |
 
-Treat sheets as **design references**. Crop export layers into `web/public/media/` when implementing; do not edit sheets in place.
+Prefer `crops.*` and `parts.*` over full sheets in UI / R3F.
 
 ## Music map → chapters
 
@@ -40,4 +48,4 @@ Treat sheets as **design references**. Crop export layers into `web/public/media
 | `ACT V・山高路远` + `12`–`14` | Journey climax |
 | `ACT VI 15` + `16` `17` | Return / Reprise / Ending |
 
-Copy as `.m4a` into `web/public/audio/`; decode via Howler. Prefer stems later; v1 uses full mixes + crossfade.
+Copy as `.m4a` into `web/public/audio/`; decode via Howler.
