@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import { FrameImage } from "@/components/ui/FrameImage";
+import { sizeOf } from "@/data/imageSize";
 
 /**
- * Cinematic chapter opener — art first, title later (docs: 标题后置).
- * Default fit=contain so illustrated panels are not over-cropped.
+ * Chapter opener sized by the art's own aspect ratio — no full-viewport letterboxing.
  */
 export function ChapterHero({
   image,
@@ -14,7 +15,6 @@ export function ChapterHero({
   tone = "dark",
   seal,
   overlay,
-  fit = "contain",
 }: {
   image: string;
   title: string;
@@ -22,31 +22,38 @@ export function ChapterHero({
   lines: string[];
   tone?: "dark" | "light";
   seal?: string;
-  /** Optional transparent sprite layered over the hero */
   overlay?: string;
-  /** contain = show full art (preferred); cover = intentional full-bleed */
-  fit?: "contain" | "cover";
 }) {
+  const { w, h } = sizeOf(image);
   return (
-    <section className={`chapter-hero chapter-hero--${tone} chapter-hero--fit-${fit}`} aria-label={title}>
-      <div className="chapter-hero__art" aria-hidden>
-        <Image src={image} alt="" fill priority={false} sizes="100vw" className="chapter-hero__img" />
-        <div className="chapter-hero__veil" />
-        {overlay ? (
-          <div className="chapter-hero__sprite">
-            <Image src={overlay} alt="" width={220} height={160} className="chapter-hero__sprite-img" />
-          </div>
-        ) : null}
-      </div>
-      <div className="chapter-hero__copy">
-        <p className="chapter-hero__eyebrow">{subtitle}</p>
-        <h2 className="chapter-hero__title">{title}</h2>
-        <div className="chapter-hero__lines">
-          {lines.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
+    <section className={`chapter-hero chapter-hero--${tone}`} aria-label={title}>
+      <div className="chapter-hero__stage">
+        <div className="chapter-hero__art" aria-hidden>
+          <Image
+            src={image}
+            alt=""
+            width={w}
+            height={h}
+            sizes="(max-width: 900px) 100vw, 1100px"
+            className="chapter-hero__img frame-img"
+            priority={false}
+          />
+          {overlay ? (
+            <div className="chapter-hero__sprite">
+              <Image src={overlay} alt="" width={220} height={160} className="chapter-hero__sprite-img" />
+            </div>
+          ) : null}
         </div>
-        {seal ? <p className="chapter-seal">{seal}</p> : null}
+        <div className="chapter-hero__copy">
+          <p className="chapter-hero__eyebrow">{subtitle}</p>
+          <h2 className="chapter-hero__title">{title}</h2>
+          <div className="chapter-hero__lines">
+            {lines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+          {seal ? <p className="chapter-seal">{seal}</p> : null}
+        </div>
       </div>
     </section>
   );

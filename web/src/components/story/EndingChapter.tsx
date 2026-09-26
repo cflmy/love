@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { brand, crops, parts } from "@/data/assets";
+import { FrameImage } from "@/components/ui/FrameImage";
 import { ArtButton } from "@/components/ui/ArtButton";
+import { brand, crops, parts } from "@/data/assets";
 
 /** Ending coda — never THE END. */
 export function EndingChapter() {
@@ -11,29 +12,16 @@ export function EndingChapter() {
 
   return (
     <section className="ending-chapter" aria-label="更远的明天">
-      <div className="ending-chapter__hero" aria-hidden>
-        <Image
-          src={crops.heroEnding}
-          alt=""
-          fill
-          sizes="100vw"
-          className="ending-chapter__img"
-          priority={false}
-        />
-      </div>
-      <div className="ending-chapter__still">
-        <Image
-          src={crops.storyCoda}
-          alt=""
-          fill
-          sizes="(max-width: 768px) 90vw, 480px"
-          className="ending-chapter__coda-img"
-        />
+      <figure className="ending-chapter__hero">
+        <FrameImage src={crops.heroEnding} sizes="(max-width: 900px) 100vw, 1100px" />
+      </figure>
+      <figure className="ending-chapter__still">
+        <FrameImage src={crops.storyCoda} sizes="(max-width: 768px) 92vw, 520px" />
         <div className="ending-chapter__sprites" aria-hidden>
           <Image src={parts.butterflyFront} alt="" width={120} height={90} />
           <Image src={parts.magpieSpread} alt="" width={130} height={100} />
         </div>
-      </div>
+      </figure>
 
       <div className="ending-chapter__brand">
         <Image src={brand.hero} alt="" width={220} height={280} className="ending-chapter__brand-img" />

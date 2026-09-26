@@ -1,28 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import { FrameImage } from "@/components/ui/FrameImage";
 import { crops, parts } from "@/data/assets";
 
 /** Breathing chapter after climax — almost no spectacle. */
 export function QuietDaysChapter() {
   return (
     <section className="quiet-days" aria-label="Quiet Days">
-      <div className="quiet-days__photo" aria-hidden>
-        <Image
-          src={crops.storyQuietTea}
-          alt=""
-          fill
-          sizes="100vw"
-          className="quiet-days__img"
-        />
-      </div>
       <div className="quiet-days__window" aria-hidden>
         <div className="quiet-days__sunshaft" />
         <div className="quiet-days__dust" />
       </div>
-      <div className="quiet-days__still" aria-hidden>
-        <Image src={crops.dayTea} alt="" fill sizes="420px" className="quiet-days__still-img" />
-      </div>
+      <figure className="quiet-days__banner">
+        <FrameImage src={crops.storyQuietTea} sizes="(max-width: 768px) 92vw, 640px" />
+      </figure>
+      <figure className="quiet-days__still">
+        <FrameImage src={crops.dayTea} sizes="360px" />
+      </figure>
       <div className="quiet-days__copy">
         <p className="quiet-days__line a">Quiet days.</p>
         <p className="quiet-days__line b">Quiet cuddles.</p>

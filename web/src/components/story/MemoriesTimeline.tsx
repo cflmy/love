@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { FrameImage } from "@/components/ui/FrameImage";
 import { crops } from "@/data/assets";
 
 export type MemoryNode = {
@@ -105,13 +105,7 @@ export function MemoriesTimeline() {
               style={{ ["--tilt" as string]: `${i % 2 === 0 ? -3 : 4}deg` }}
             >
               <div className="memory-card__photo">
-                <Image
-                  src={node.photo}
-                  alt={node.title}
-                  fill
-                  sizes="(max-width: 768px) 70vw, 280px"
-                  className="memory-card__img"
-                />
+                <FrameImage src={node.photo} sizes="(max-width: 768px) 70vw, 280px" className="memory-card__img" />
               </div>
               <p className="memory-card__date">{node.date}</p>
               <h3>{node.title}</h3>

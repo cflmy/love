@@ -3,6 +3,7 @@
 import { useRef, type ButtonHTMLAttributes, type CSSProperties, type MouseEvent } from "react";
 import Image from "next/image";
 import { uiButtons } from "@/data/assets";
+import { sizeOf } from "@/data/imageSize";
 
 export type ArtButtonVariant = keyof typeof uiButtons;
 
@@ -10,11 +11,12 @@ type Props = {
   variant?: ArtButtonVariant;
   label: string;
   className?: string;
+  /** Display width in CSS px; height follows intrinsic ratio */
   width?: number;
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className">;
 
 /**
- * Illustrated CTA from UI kit sheets — physical hover/press, not CSS pills.
+ * Illustrated CTA from UI kit — transparent silhouette, intrinsic ratio.
  */
 export function ArtButton({
   variant = "start",
@@ -27,6 +29,8 @@ export function ArtButton({
 }: Props) {
   const ref = useRef<HTMLButtonElement>(null);
   const src = uiButtons[variant];
+  const { w, h } = sizeOf(src);
+  const displayH = Math.max(36, Math.round((width * h) / Math.max(w, 1)));
 
   const onMove = (e: MouseEvent<HTMLButtonElement>) => {
     const el = ref.current;
@@ -71,9 +75,11 @@ export function ArtButton({
       <Image
         src={src}
         alt=""
-        width={width}
-        height={Math.round(width * 0.32)}
-        className="art-button__img"
+        width={w}
+        height={h}
+        sizes={`${width}px`}
+        className="art-button__img frame-img"
+        style={{ width, height: displayH }}
         draggable={false}
       />
       <span className="sr-only">{label}</span>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { FrameImage } from "@/components/ui/FrameImage";
 import { brand, crops } from "@/data/assets";
 
 /** Minimal letter page embedded in the scroll — paper, not WebGL. */
@@ -10,15 +11,9 @@ export function LetterChapter() {
 
   return (
     <section className="letter-chapter" aria-label="给你的一封信">
-      <div className="letter-chapter__still">
-        <Image
-          src={crops.storyLetter}
-          alt=""
-          fill
-          sizes="(max-width: 768px) 90vw, 520px"
-          className="letter-chapter__img"
-        />
-      </div>
+      <figure className="letter-chapter__still">
+        <FrameImage src={crops.storyLetter} sizes="(max-width: 768px) 92vw, 560px" />
+      </figure>
 
       <button
         type="button"

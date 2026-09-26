@@ -27,11 +27,10 @@ You are directing a scroll-controlled Oriental love film — not a landing page.
 
 ## Image framing (critical)
 
-- Supplied art is sacred — **do not over-crop**.
-- Forbidden: decorative `transform: scale(1.02+)` on photos to “hide seams” by chopping more.
-- Prefer `object-fit: contain` for narrative stills / banners / multi-panel art.
-- Use `cover` only for intentional full-bleed shots, with no extra scale; set `object-position` to protect faces / horizon / subjects.
-- Never force ultra-wide banners into tall portrait frames (or vice versa) via cover.
+- Supplied art is sacred — do not over-crop **and** do not fake “full show” with black letterbox bars.
+- Size containers by each file’s intrinsic aspect ratio (`FrameImage` / `height: auto`).
+- Forbidden: decorative `scale(1.02+)`; fixed wrong-aspect boxes + `contain` creating 黑边.
+- Buttons: chroma-key + connectivity (search ROI ≠ button shape). Never straight-edge button cuts.
 
 ## Anti-patterns
 

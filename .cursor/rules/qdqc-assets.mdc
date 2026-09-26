@@ -36,13 +36,12 @@ Manual cuts may leave fringe: prefer transparent `parts/` sprites; for scene pan
 
 Prefer `crops.*` and `parts.*` over full sheets in UI / R3F.
 
-## Framing (do not over-crop)
+## Framing (respect intrinsic size)
 
-- Never add decorative `transform: scale(1.02+)` on photos to hide seams — that chops more art.
-- Narrative stills / banners / film strips: prefer `object-fit: contain`.
-- Full-bleed heroes may use `cover` **without** extra scale; set `object-position` to protect faces / horizon / subject.
-- Ultra-wide banners (`story-banner`, `story-quiet-tea`, `story-letter`, `story-coda`) must not be forced into tall portrait boxes via cover.
-- When in doubt: show more of the illustration (letterbox) rather than crop.
+- Do **not** force art into fixed aspect boxes with `object-fit: contain` + dark letterbox bars.
+- Prefer `FrameImage` / `width:100%; height:auto` so each file keeps its own ratio.
+- Use `cover` only for intentional atmospheric full-bleed (e.g. journey sticky plate).
+- Buttons: extract via **chroma-key + connected components** (`extract-ui-buttons.py`), never straight-edge fractional crops of the button silhouette.
 
 ## Music map → chapters
 

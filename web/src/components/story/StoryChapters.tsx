@@ -35,7 +35,6 @@ export function StoryChapters() {
         subtitle="A quieter, brighter tomorrow."
         lines={["Que dure", "que câlin", "愿天长地久", "愿紧紧相拥"]}
         overlay={parts.butterflyFront}
-        fit="cover"
       />
 
       {prayerScenes.map((beat) => (

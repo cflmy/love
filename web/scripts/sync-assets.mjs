@@ -80,3 +80,4 @@ const sysPy = "python3";
 const py = fs.existsSync(venvPy) ? venvPy : sysPy;
 run(py, [path.join(__dirname, "process-zip-assets.py")]);
 run(py, [path.join(__dirname, "extract-ui-buttons.py")]);
+run(py, [path.join(__dirname, "write-image-size.py")]);
