@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { crops } from "@/data/assets";
+import { brand, crops, parts } from "@/data/assets";
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore, type OpeningPhase } from "@/store/story";
 
@@ -19,6 +19,7 @@ export function OpeningGate() {
   const entrySource = useStoryStore((s) => s.entrySource);
   const visitCount = useStoryStore((s) => s.visitCount);
   const [busy, setBusy] = useState(false);
+  const [frame, setFrame] = useState(0);
   const returning = visitCount > 1;
 
   useEffect(() => {
@@ -35,6 +36,14 @@ export function OpeningGate() {
       cancelled = true;
     };
   }, [reduced, setPhase]);
+
+  useEffect(() => {
+    if (phase !== "butterfly" && phase !== "portal") return;
+    const id = setInterval(() => {
+      setFrame((f) => (f + 1) % parts.butterflyFlight.length);
+    }, reduced ? 120 : 90);
+    return () => clearInterval(id);
+  }, [phase, reduced]);
 
   const runRitual = async () => {
     if (busy || phase !== "invite") return;
@@ -85,6 +94,9 @@ export function OpeningGate() {
       <div className="opening-gate__stars" aria-hidden />
 
       <div className="opening-gate__mark" aria-hidden={phase === "silence"}>
+        <div className="opening-gate__logo">
+          <Image src={brand.icon} alt="" width={88} height={88} priority className="opening-gate__logo-img" />
+        </div>
         <span className="opening-gate__qdqc">QDQC</span>
         <span className="opening-gate__inf">∞</span>
         <span className="opening-gate__tag">
@@ -120,9 +132,14 @@ export function OpeningGate() {
           </div>
 
           <div className="opening-butterfly" aria-hidden>
-            <span className="opening-butterfly__wing left" />
-            <span className="opening-butterfly__body" />
-            <span className="opening-butterfly__wing right" />
+            <Image
+              src={parts.butterflyFlight[frame]}
+              alt=""
+              width={180}
+              height={120}
+              className="opening-butterfly__sprite"
+              priority
+            />
             <span className="opening-butterfly__trail" />
           </div>
         </div>

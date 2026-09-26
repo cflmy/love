@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { crops } from "@/data/assets";
+import { brand, crops, parts } from "@/data/assets";
 
 /** Ending coda — never THE END. */
 export function EndingChapter() {
@@ -28,6 +28,14 @@ export function EndingChapter() {
           sizes="(max-width: 768px) 90vw, 480px"
           className="ending-chapter__coda-img"
         />
+        <div className="ending-chapter__sprites" aria-hidden>
+          <Image src={parts.butterflyFront} alt="" width={120} height={90} />
+          <Image src={parts.magpieSpread} alt="" width={130} height={100} />
+        </div>
+      </div>
+
+      <div className="ending-chapter__brand">
+        <Image src={brand.hero} alt="" width={220} height={280} className="ending-chapter__brand-img" />
       </div>
 
       <p className="ending-chapter__eyebrow">To Be Continued…</p>

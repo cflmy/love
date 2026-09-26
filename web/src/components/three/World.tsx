@@ -71,10 +71,10 @@ function BridgePlate() {
   texture.colorSpace = THREE.SRGBColorSpace;
   const meet = useChapterLocal("meeting");
   const reveal = useStoryStore((s) => s.worldReveal);
-  const opacity = THREE.MathUtils.smoothstep(meet, 0.05, 0.35) * 0.42 * reveal;
+  const opacity = THREE.MathUtils.smoothstep(meet, 0.05, 0.35) * 0.55 * reveal;
 
   return (
-    <mesh position={[0, -0.15, -3.2]} scale={[9.2, 5.2, 1]}>
+    <mesh position={[0, -0.15, -3.2]} scale={[9.8, 5.5, 1]}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial map={texture} transparent opacity={opacity} />
     </mesh>
@@ -203,40 +203,58 @@ function BridgeLamps({ lit }: { lit: number }) {
   );
 }
 
-function Petals({ density }: { density: number }) {
-  const ref = useRef<THREE.Points>(null);
-  const positions = useMemo(() => {
-    const arr = new Float32Array(120 * 3);
-    for (let i = 0; i < 120; i++) {
-      arr[i * 3] = (Math.random() - 0.5) * 10;
-      arr[i * 3 + 1] = Math.random() * 5 - 1;
-      arr[i * 3 + 2] = (Math.random() - 0.5) * 6 - 1;
-    }
-    return arr;
-  }, []);
+function SpriteDrift() {
+  const group = useRef<THREE.Group>(null);
+  const meet = useChapterLocal("meeting");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const textures = useTexture([...parts.floaters.slice(0, 5)]);
+  textures.forEach((t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+  });
+
+  const seeds = useMemo(
+    () =>
+      Array.from({ length: 5 }, (_, i) => ({
+        x: -3.5 + i * 1.6,
+        y: 0.2 + (i % 3) * 0.55,
+        z: -1.8 - (i % 2) * 0.4,
+        s: 0.35 + (i % 3) * 0.12,
+        speed: 0.4 + i * 0.08,
+      })),
+    [],
+  );
 
   useFrame(({ clock }) => {
-    if (!ref.current) return;
-    const attr = ref.current.geometry.getAttribute("position") as THREE.BufferAttribute;
+    if (!group.current) return;
     const t = clock.elapsedTime;
-    for (let i = 0; i < 120; i++) {
-      let y = attr.getY(i) - 0.004 - (i % 5) * 0.0008;
-      if (y < -2) y = 4;
-      attr.setY(i, y);
-      attr.setX(i, attr.getX(i) + Math.sin(t * 0.4 + i) * 0.002);
-    }
-    attr.needsUpdate = true;
-    const mat = ref.current.material as THREE.PointsMaterial;
-    mat.opacity = 0.15 + density * 0.35;
+    const show = reveal * (0.35 + meet * 0.45);
+    group.current.visible = show > 0.05;
+    group.current.children.forEach((child, i) => {
+      const mesh = child as THREE.Mesh;
+      const seed = seeds[i];
+      mesh.position.x = seed.x + Math.sin(t * seed.speed + i) * 0.35;
+      mesh.position.y = seed.y + Math.cos(t * 0.55 + i) * 0.2;
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      mat.opacity = show * (0.35 + (i % 3) * 0.12);
+    });
   });
 
   return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial color="#F7F3E9" size={0.045} transparent opacity={0.3} depthWrite={false} />
-    </points>
+    <group ref={group}>
+      {seeds.map((seed, i) => (
+        <mesh key={i} position={[seed.x, seed.y, seed.z]} scale={[seed.s * 1.4, seed.s, 1]}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial
+            map={textures[i]}
+            transparent
+            depthWrite={false}
+            opacity={0.4}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -457,7 +475,6 @@ function CameraRig() {
 
 export function QDQCWorld() {
   const meet = useChapterLocal("meeting");
-  const journey = useChapterLocal("journey");
   const lit = THREE.MathUtils.smoothstep(meet, 0.45, 0.92);
   const reduced = useStoryStore((s) => s.reducedMotion);
 
@@ -484,7 +501,7 @@ export function QDQCWorld() {
       <BridgeLamps lit={lit} />
       <Butterfly />
       <Magpie />
-      {!reduced && <Petals density={0.35 + meet * 0.45 + journey * 0.4} />}
+      {!reduced && <SpriteDrift />}
     </>
   );
 }

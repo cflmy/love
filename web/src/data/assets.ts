@@ -130,6 +130,13 @@ export const parts = {
     "/media/parts/magpie-flight-05.webp",
     "/media/parts/magpie-flight-06.webp",
   ],
+  butterflyFront: "/media/parts/butterfly-front.webp",
+  butterflySide: "/media/parts/butterfly-side.webp",
+  butterflyBack: "/media/parts/butterfly-back.webp",
+  magpieSpread: "/media/parts/magpie-pose-01.webp",
+  magpieSide: "/media/parts/magpie-pose-02.webp",
+  magpiePerch: "/media/parts/magpie-pose-03.webp",
+  magpieBack: "/media/parts/magpie-pose-04.webp",
   butterflyElements: Array.from(
     { length: 14 },
     (_, i) => `/media/parts/butterfly-element-${String(i + 1).padStart(2, "0")}.webp`,
@@ -138,6 +145,37 @@ export const parts = {
     { length: 14 },
     (_, i) => `/media/parts/magpie-element-${String(i + 1).padStart(2, "0")}.webp`,
   ),
+  /** Decorative floaters — butterflies + petals from element sheets */
+  floaters: [
+    "/media/parts/butterfly-element-01.webp",
+    "/media/parts/butterfly-element-02.webp",
+    "/media/parts/butterfly-element-04.webp",
+    "/media/parts/butterfly-element-07.webp",
+    "/media/parts/butterfly-element-09.webp",
+    "/media/parts/magpie-element-01.webp",
+    "/media/parts/magpie-element-03.webp",
+  ],
+} as const;
+
+/** Brand marks from assert/zip 001–002 (manual slices). */
+export const brand = {
+  /** Portrait logo tile — loading / nav mark */
+  icon: "/media/slices/001/001_06.webp",
+  portrait: "/media/slices/001/001_01.webp",
+  /** Main brand block with QDQC + motto */
+  hero: "/media/slices/002/002_01.webp",
+  wordmark: "/media/slices/002/002_05.webp",
+  seal: "/media/slices/002/002_12.webp",
+} as const;
+
+/** Extra bridge / atmosphere tiles not aliased into crops. */
+export const worldArt = {
+  bridgeHero: "/media/slices/010/010_01.webp",
+  bridgeBanner: "/media/slices/010/010_02.webp",
+  bridgeDetail: "/media/slices/010/010_08.webp",
+  bridgeStrip: "/media/slices/010/010_23.webp",
+  butterflyDetail: "/media/slices/008/008_09.webp",
+  magpieSheet: "/media/slices/009/009_02.webp",
 } as const;
 
 /** Manual zip slice roots (full tile sets). Prefer `crops` / `parts` in UI. */

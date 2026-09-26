@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { crops } from "@/data/assets";
+import Image from "next/image";
+import { brand, crops, parts } from "@/data/assets";
 import { useStoryStore } from "@/store/story";
 
 export function LoadingGate({ children }: { children: React.ReactNode }) {
@@ -12,12 +13,19 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    const urls = [crops.nfcFront, crops.heroDesktop, crops.heroEnding, crops.meetBridge];
+    const urls = [
+      crops.nfcFront,
+      crops.heroDesktop,
+      crops.bridgeFull,
+      crops.meetBridge,
+      parts.butterflyFlight[0],
+      brand.icon,
+    ];
     Promise.all(
       urls.map(
         (src) =>
           new Promise<void>((resolve) => {
-            const img = new Image();
+            const img = new window.Image();
             img.onload = () => resolve();
             img.onerror = () => resolve();
             img.src = src;
@@ -33,7 +41,7 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!ready) return;
-    const t = setTimeout(() => setFade(true), 280);
+    const t = setTimeout(() => setFade(true), 320);
     return () => clearTimeout(t);
   }, [ready]);
 
@@ -41,6 +49,7 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
     <>
       <div className={`loading-gate ${fade ? "is-done" : ""}`} aria-hidden={fade}>
         <div className="loading-gate__mark">
+          <Image src={brand.icon} alt="" width={72} height={72} className="loading-gate__logo" priority />
           <span>QDQC</span>
           <span className="loading-gate__inf">∞</span>
         </div>

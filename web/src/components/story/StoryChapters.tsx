@@ -11,43 +11,15 @@ import {
   responseScenes,
   storyStrip,
 } from "@/data/scenes";
+import { crops, parts } from "@/data/assets";
 import { JourneyChapter } from "./JourneyChapter";
 import { MemoriesTimeline } from "./MemoriesTimeline";
 import { QuietDaysChapter } from "./QuietDaysChapter";
 import { LetterChapter } from "./LetterChapter";
 import { EndingChapter } from "./EndingChapter";
-import { SceneBeatView, StoryFilmStrip } from "./SceneBeat";
+import { ChapterHero } from "./ChapterHero";
+import { MeetingTriptych, SceneBeatView, StoryFilmStrip } from "./SceneBeat";
 import { useStoryStore } from "@/store/story";
-
-function ChapterBlock({
-  title,
-  subtitle,
-  lines,
-  tone = "dark",
-  seal,
-}: {
-  title: string;
-  subtitle: string;
-  lines: string[];
-  tone?: "dark" | "light";
-  seal?: string;
-}) {
-  const light = tone === "light";
-  return (
-    <section className="flex min-h-[100svh] items-center justify-center px-6 py-24">
-      <div className={`chapter-panel mx-auto max-w-xl text-center ${light ? "is-light" : "is-dark"}`}>
-        <p className="chapter-panel__eyebrow">{subtitle}</p>
-        <h2 className="chapter-panel__title">{title}</h2>
-        <div className="chapter-panel__lines">
-          {lines.map((line) => (
-            <p key={line}>{line}</p>
-          ))}
-        </div>
-        {seal ? <p className="chapter-seal">{seal}</p> : null}
-      </div>
-    </section>
-  );
-}
 
 export function StoryChapters() {
   const entered = useStoryStore((s) => s.entered);
@@ -57,25 +29,30 @@ export function StoryChapters() {
 
   return (
     <div style={{ minHeight: `${STORY_SCROLL_VH}svh` }} className="relative">
-      <ChapterBlock
+      <ChapterHero
+        image={crops.heroDesktop}
         title="QDQC"
         subtitle="A quieter, brighter tomorrow."
         lines={["Que dure", "que câlin", "愿天长地久", "愿紧紧相拥"]}
+        overlay={parts.butterflyFront}
       />
 
       {prayerScenes.map((beat) => (
         <SceneBeatView key={beat.id} beat={beat} />
       ))}
-      <ChapterBlock
+      <ChapterHero
+        image={crops.posterHer}
         title={chapters[1].title}
         subtitle={chapters[1].subtitle}
         lines={chapters[1].copy}
+        overlay={parts.butterflySide}
       />
 
       {responseScenes.map((beat) => (
         <SceneBeatView key={beat.id} beat={beat} tone="light" />
       ))}
-      <ChapterBlock
+      <ChapterHero
+        image={crops.dayTea}
         title={chapters[2].title}
         subtitle={chapters[2].subtitle}
         lines={chapters[2].copy}
@@ -83,28 +60,41 @@ export function StoryChapters() {
       />
 
       <StoryFilmStrip images={storyStrip} label="故事长卷" />
-      {meetingScenes.map((beat) => (
-        <SceneBeatView key={beat.id} beat={beat} />
-      ))}
-      <ChapterBlock
+
+      {/* docs: 相逢先 WatchBeat，标题后置 */}
+      <MeetingTriptych
+        images={[crops.meetShe, crops.meetHe, crops.meetBridge]}
+        captions={["她·渡河", "他·远方", "桥·灯起"]}
+      />
+      {meetingScenes
+        .filter((b) => !["meet-she", "meet-he", "meet-bridge"].includes(b.id))
+        .map((beat) => (
+          <SceneBeatView key={beat.id} beat={beat} />
+        ))}
+      <ChapterHero
+        image={crops.bridgeFull}
         title={chapters[3].title}
         subtitle={chapters[3].subtitle}
         lines={chapters[3].copy}
+        overlay={parts.magpieSpread}
       />
 
       {pastScenes.map((beat) => (
         <SceneBeatView key={beat.id} beat={beat} />
       ))}
-      <ChapterBlock
+      <ChapterHero
+        image={crops.pastChangfeng}
         title={chapters[4].title}
         subtitle={chapters[4].subtitle}
         lines={["长风恋暮云，", "这是我们曾经的许诺。", "∞"]}
+        overlay={parts.magpiePerch}
       />
 
       {presentScenes.map((beat) => (
         <SceneBeatView key={beat.id} beat={beat} tone="light" />
       ))}
-      <ChapterBlock
+      <ChapterHero
+        image={crops.lifeLuck}
         title={chapters[5].title}
         subtitle={chapters[5].subtitle}
         lines={chapters[5].copy}
@@ -119,7 +109,8 @@ export function StoryChapters() {
       {journeyOutro.map((beat) => (
         <SceneBeatView key={beat.id} beat={beat} />
       ))}
-      <ChapterBlock
+      <ChapterHero
+        image={crops.roadEmbrace}
         title={chapters[6].title}
         subtitle={chapters[6].subtitle}
         lines={[

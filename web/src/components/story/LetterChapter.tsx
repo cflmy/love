@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { crops } from "@/data/assets";
+import { brand, crops } from "@/data/assets";
 
 /** Minimal letter page embedded in the scroll — paper, not WebGL. */
 export function LetterChapter() {
@@ -26,7 +26,10 @@ export function LetterChapter() {
         onClick={() => setOpen(true)}
         aria-expanded={open}
       >
-        <span className="letter-envelope__seal">QDQC</span>
+        <span className="letter-envelope__seal">
+          <Image src={brand.seal} alt="" width={48} height={48} className="letter-envelope__seal-img" />
+          QDQC
+        </span>
         <span className="letter-envelope__hint">{open ? "致我最想拥抱的人" : "打开这封信"}</span>
       </button>
 

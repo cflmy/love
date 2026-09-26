@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { brand } from "@/data/assets";
 import { chapters } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
 
@@ -18,15 +20,18 @@ export function ChapterNav() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="pointer-events-auto font-serif text-sm tracking-[0.35em] text-[#F7F3E9]/90 transition hover:text-[#C7A66A]"
+        className="chapter-nav__mark pointer-events-auto"
         aria-expanded={open}
       >
-        QDQC
-        <span className="mt-1 block text-center text-base text-[#C7A66A]">∞</span>
+        <Image src={brand.icon} alt="" width={40} height={40} className="chapter-nav__logo" />
+        <span className="chapter-nav__qdqc">
+          QDQC
+          <span>∞</span>
+        </span>
       </button>
 
       <div
-        className={`pointer-events-auto mt-4 overflow-hidden rounded-2xl border border-[#C7A66A]/25 bg-[#050810]/70 p-4 backdrop-blur-md transition-all duration-500 ${
+        className={`pointer-events-auto mt-4 overflow-hidden rounded-2xl border border-[#C7A66A]/25 bg-[#050810]/75 p-4 backdrop-blur-md transition-all duration-500 ${
           open ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0 border-transparent p-0"
         }`}
       >
