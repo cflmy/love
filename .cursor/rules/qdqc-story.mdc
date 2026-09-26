@@ -36,4 +36,8 @@ Do not open all chapters until this slice meets the cinematic bar.
 
 ## Depth layers
 
-`sky → moon/mountains → water/bridge → characters/creatures → DOM text/UI`
+`sky → moon → far mountains → near mountains → mist → water/bridge → creatures → foreground → DOM text/UI`
+
+Different `scrollMultiplier` + damping per layer. Camera must dolly/pan during 相逢鹊渡.
+
+See `CINEMATIC_DIRECTION.md` and `DEVELOPMENT_CONSTITUTION.md` (from docs/007).

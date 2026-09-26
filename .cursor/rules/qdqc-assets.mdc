@@ -36,6 +36,14 @@ Manual cuts may leave fringe: prefer transparent `parts/` sprites; for scene pan
 
 Prefer `crops.*` and `parts.*` over full sheets in UI / R3F.
 
+## Framing (do not over-crop)
+
+- Never add decorative `transform: scale(1.02+)` on photos to hide seams — that chops more art.
+- Narrative stills / banners / film strips: prefer `object-fit: contain`.
+- Full-bleed heroes may use `cover` **without** extra scale; set `object-position` to protect faces / horizon / subject.
+- Ultra-wide banners (`story-banner`, `story-quiet-tea`, `story-letter`, `story-coda`) must not be forced into tall portrait boxes via cover.
+- When in doubt: show more of the illustration (letterbox) rather than crop.
+
 ## Music map → chapters
 
 | Track | Chapter |

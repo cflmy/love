@@ -1,0 +1,44 @@
+---
+description: QDQC cinematic constitution from docs/007 — scroll is camera, not PPT
+alwaysApply: true
+---
+
+# QDQC · Cinematic Constitution (from docs/007)
+
+You are directing a scroll-controlled Oriental love film — not a landing page.
+
+## Absolute
+
+- Scrolling = **camera movement through a world**, never section fade slideshow.
+- Prefer **Shot** design (camera / subject / depth / light / motion / text / sound).
+- Forbidden substitutes: fade+translateY as the whole animation system; one static camera; CSS-only “smooth scroll” as cinema; inventing assets when supplied ones exist.
+- Lenis = scroll feel only. **GSAP ScrollTrigger** = timelines. **R3F** = spatial world.
+- One persistent WebGL canvas. Chapters transform the world; do not remount Canvas.
+
+## Motion checklist (every major scene)
+
+1. ≥4 depth layers with different `scrollMultiplier`
+2. Perceptible camera (dolly / pan / target / FOV)
+3. Temporal lag (different damping per layer)
+4. Subject motion (Bezier/path — not linear fade-in)
+5. Spatial enter/exit (not opacity crossfade alone)
+6. Cinematic typography timing (blur→focus / beats with silence)
+7. Supplied button art used as world objects when available
+
+## Image framing (critical)
+
+- Supplied art is sacred — **do not over-crop**.
+- Forbidden: decorative `transform: scale(1.02+)` on photos to “hide seams” by chopping more.
+- Prefer `object-fit: contain` for narrative stills / banners / multi-panel art.
+- Use `cover` only for intentional full-bleed shots, with no extra scale; set `object-position` to protect faces / horizon / subjects.
+- Never force ultra-wide banners into tall portrait frames (or vice versa) via cover.
+
+## Anti-patterns
+
+No: every section = 100vh fade-in; static Three.js wallpaper; CSS rounded buttons replacing kit art; same easing everywhere; particle/bloom demo mode; constant visual noise.
+
+## Delivery order
+
+Ship one vertical slice to cinematic quality before breadth. First gate: **相逢鹊渡**.
+
+Full shot bible: `CINEMATIC_DIRECTION.md`. Full skill extract: `DEVELOPMENT_CONSTITUTION.md`.

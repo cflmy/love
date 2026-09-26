@@ -3,7 +3,8 @@
 import Image from "next/image";
 
 /**
- * Cinematic chapter opener — full-bleed art first, title later (docs: 标题后置).
+ * Cinematic chapter opener — art first, title later (docs: 标题后置).
+ * Default fit=contain so illustrated panels are not over-cropped.
  */
 export function ChapterHero({
   image,
@@ -13,6 +14,7 @@ export function ChapterHero({
   tone = "dark",
   seal,
   overlay,
+  fit = "contain",
 }: {
   image: string;
   title: string;
@@ -22,9 +24,11 @@ export function ChapterHero({
   seal?: string;
   /** Optional transparent sprite layered over the hero */
   overlay?: string;
+  /** contain = show full art (preferred); cover = intentional full-bleed */
+  fit?: "contain" | "cover";
 }) {
   return (
-    <section className={`chapter-hero chapter-hero--${tone}`} aria-label={title}>
+    <section className={`chapter-hero chapter-hero--${tone} chapter-hero--fit-${fit}`} aria-label={title}>
       <div className="chapter-hero__art" aria-hidden>
         <Image src={image} alt="" fill priority={false} sizes="100vw" className="chapter-hero__img" />
         <div className="chapter-hero__veil" />
