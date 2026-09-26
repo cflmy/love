@@ -22,6 +22,13 @@ function trackForChapter(id: string, local: number): TrackId | null {
   if (id === "past") {
     return local < 0.45 ? "past" : "promise";
   }
+  if (id === "journey") {
+    if (local < 0.26) return "journey";
+    if (local < 0.46) return "dontHurry";
+    if (local < 0.68) return "mountains";
+    if (local < 0.9) return "towardYou";
+    return "sunNeverSets";
+  }
   return chapter.themeTrack;
 }
 
@@ -81,9 +88,18 @@ export function ScrollSync({ children }: { children: React.ReactNode }) {
           const track = trackForChapter(chapter.id, local);
           if (track && track !== lastTrack.current) {
             lastTrack.current = track;
-            MusicEngine.play(track, chapter.id === "meeting" ? 2200 : 1600);
+            const fade =
+              chapter.id === "meeting" || chapter.id === "journey" ? 2200 : 1600;
+            MusicEngine.play(track, fade);
           }
-          MusicEngine.setIntensity(0.35 + p * 0.65);
+          // Journey intensity: crescendo then sudden hush at embrace.
+          if (chapter.id === "journey") {
+            const rise = Math.min(1, local / 0.78);
+            const hush = local > 0.9 ? Math.max(0.15, 1 - (local - 0.9) / 0.08) : 1;
+            MusicEngine.setIntensity(0.35 + rise * 0.65 * hush);
+          } else {
+            MusicEngine.setIntensity(0.35 + p * 0.65);
+          }
         }
       },
     });

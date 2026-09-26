@@ -2,6 +2,11 @@
 
 import { chapters, STORY_SCROLL_VH } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
+import { JourneyChapter } from "./JourneyChapter";
+import { MemoriesTimeline } from "./MemoriesTimeline";
+import { QuietDaysChapter } from "./QuietDaysChapter";
+import { LetterChapter } from "./LetterChapter";
+import { EndingChapter } from "./EndingChapter";
 
 function ChapterBlock({
   title,
@@ -102,33 +107,25 @@ export function StoryChapters() {
         seal="老天安排的最大！"
       />
 
+      {/* Phase 6 climax — long scroll runway */}
+      <WatchBeat hint="山高路远" />
+      <JourneyChapter />
+      <WatchBeat hint="奔赴" />
+      <WatchBeat hint="相拥" />
       <ChapterBlock
         title={chapters[6].title}
         subtitle={chapters[6].subtitle}
-        lines={chapters[6].copy}
+        lines={[
+          "山高路远，祝君日安。",
+          "我会翻山越岭，拼尽全力来到你的身边。",
+          "日后与君，平安喜乐。",
+        ]}
       />
-      <ChapterBlock
-        title={chapters[7].title}
-        subtitle={chapters[7].subtitle}
-        lines={chapters[7].copy}
-      />
-      <ChapterBlock
-        title={chapters[8].title}
-        subtitle={chapters[8].subtitle}
-        lines={chapters[8].copy}
-        tone="light"
-      />
-      <ChapterBlock
-        title={chapters[9].title}
-        subtitle={chapters[9].subtitle}
-        lines={chapters[9].copy}
-        tone="light"
-      />
-      <ChapterBlock
-        title={chapters[10].title}
-        subtitle={chapters[10].subtitle}
-        lines={chapters[10].copy}
-      />
+
+      <MemoriesTimeline />
+      <QuietDaysChapter />
+      <LetterChapter />
+      <EndingChapter />
     </div>
   );
 }

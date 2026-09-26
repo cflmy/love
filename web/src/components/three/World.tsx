@@ -328,17 +328,72 @@ function Magpie() {
   );
 }
 
+function JourneyPlate() {
+  const texture = useTexture(images.storyBoardC);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const journey = useChapterLocal("journey");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const opacity =
+    THREE.MathUtils.smoothstep(journey, 0.05, 0.25) *
+    (1 - THREE.MathUtils.smoothstep(journey, 0.92, 1)) *
+    0.58 *
+    reveal;
+
+  return (
+    <mesh position={[0, 0.05, -4.9]} scale={[11.2, 6.3, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={texture} transparent opacity={opacity} />
+    </mesh>
+  );
+}
+
+function HeldSun() {
+  const ref = useRef<THREE.Mesh>(null);
+  const glow = useRef<THREE.PointLight>(null);
+  const journey = useChapterLocal("journey");
+
+  useFrame(() => {
+    if (!ref.current || !glow.current) return;
+    const show = THREE.MathUtils.smoothstep(journey, 0.08, 0.3);
+    const hush = journey > 0.9;
+    // Before hush the sun sinks; after embrace it freezes near the ridge.
+    const sink = hush ? 0.42 : journey * 0.7;
+    ref.current.visible = show > 0.02;
+    ref.current.position.set(0.2, 1.55 - sink, -4.2);
+    const mat = ref.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = 0.35 + show * 0.55 + (hush ? 0.15 : 0);
+    glow.current.intensity = show * (hush ? 2.2 : 1.2 + journey);
+    glow.current.position.copy(ref.current.position);
+  });
+
+  return (
+    <>
+      <mesh ref={ref}>
+        <circleGeometry args={[0.85, 48]} />
+        <meshBasicMaterial color="#E8A45A" transparent opacity={0.8} />
+      </mesh>
+      <pointLight ref={glow} color="#E8A45A" intensity={0} distance={16} />
+    </>
+  );
+}
+
 function Atmosphere() {
   const fogRef = useRef<THREE.Fog>(null);
   const past = useChapterLocal("past");
   const present = useChapterLocal("present");
+  const journey = useChapterLocal("journey");
   const sunRef = useRef<THREE.PointLight>(null);
   const mythRef = useRef<THREE.PointLight>(null);
+  const phoenixRef = useRef<THREE.PointLight>(null);
 
   useFrame(() => {
     if (fogRef.current) {
       const c = new THREE.Color();
-      if (present > 0.05) {
+      if (journey > 0.05) {
+        // Warm dusk during climax, cooler after hush.
+        if (journey > 0.9) c.set("#12182a");
+        else c.setRGB(0.12 + journey * 0.1, 0.05 + journey * 0.04, 0.04);
+      } else if (present > 0.05) {
         c.set("#1a2438");
       } else if (past > 0.05) {
         c.setRGB(0.05 + past * 0.12, 0.02 + past * 0.04, 0.08 + past * 0.1);
@@ -353,6 +408,10 @@ function Atmosphere() {
     if (sunRef.current) {
       sunRef.current.intensity = THREE.MathUtils.smoothstep(present, 0.1, 0.6) * 1.3;
     }
+    if (phoenixRef.current) {
+      const flare = THREE.MathUtils.smoothstep(journey, 0.55, 0.78);
+      phoenixRef.current.intensity = flare * 2.4 * (journey > 0.9 ? 0.25 : 1);
+    }
   });
 
   return (
@@ -360,6 +419,7 @@ function Atmosphere() {
       <fog ref={fogRef} attach="fog" args={["#050810", 6, 16]} />
       <pointLight ref={mythRef} position={[-2, 2.2, -3]} color="#9C493E" intensity={0} distance={14} />
       <pointLight ref={sunRef} position={[3, 3, -2]} color="#C7A66A" intensity={0} distance={14} />
+      <pointLight ref={phoenixRef} position={[0, 2.8, -3.5]} color="#FFB46A" intensity={0} distance={18} />
     </>
   );
 }
@@ -370,6 +430,7 @@ function CameraRig() {
   const reveal = useStoryStore((s) => s.worldReveal);
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
+  const journey = useChapterLocal("journey");
 
   useFrame(({ camera }) => {
     if (reduced) {
@@ -381,9 +442,14 @@ function CameraRig() {
     const journeyZ = portalZ - progress * 3.2;
     const meetPull = THREE.MathUtils.smoothstep(meet, 0.55, 0.95) * 1.1;
     const mythLift = THREE.MathUtils.smoothstep(past, 0.2, 0.8) * 0.45;
-    const z = journeyZ - meetPull;
-    const y = 0.95 - progress * 0.5 - meetPull * 0.15 + mythLift;
-    const x = Math.sin(progress * Math.PI * 2) * 0.28 + past * 0.2;
+    const climaxPush = THREE.MathUtils.smoothstep(journey, 0.7, 0.92) * 1.35;
+    const hushPull = journey > 0.92 ? (journey - 0.92) * 2.5 : 0;
+    const z = journeyZ - meetPull - climaxPush + hushPull;
+    const y = 0.95 - progress * 0.5 - meetPull * 0.15 + mythLift + climaxPush * 0.15;
+    const x =
+      Math.sin(progress * Math.PI * 2) * 0.28 +
+      past * 0.2 +
+      Math.sin(journey * Math.PI) * 0.45;
     camera.position.lerp(new THREE.Vector3(x, y, z), 0.07);
     camera.lookAt(0, 0.1 - progress * 0.15 + mythLift * 0.2, -2.4);
   });
@@ -393,6 +459,7 @@ function CameraRig() {
 
 export function QDQCWorld() {
   const meet = useChapterLocal("meeting");
+  const journey = useChapterLocal("journey");
   const lit = THREE.MathUtils.smoothstep(meet, 0.45, 0.92);
   const reduced = useStoryStore((s) => s.reducedMotion);
 
@@ -409,15 +476,17 @@ export function QDQCWorld() {
       <Backdrop />
       <PastPlate />
       <PresentPlate />
+      <JourneyPlate />
       <BridgePlate />
       <EndingHint />
       <Moon />
+      <HeldSun />
       <Water />
       <WindCloudInfinity />
       <BridgeLamps lit={lit} />
       <Butterfly />
       <Magpie />
-      {!reduced && <Petals density={0.35 + meet * 0.65} />}
+      {!reduced && <Petals density={0.35 + meet * 0.45 + journey * 0.4} />}
     </>
   );
 }

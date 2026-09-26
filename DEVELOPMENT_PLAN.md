@@ -170,23 +170,23 @@ NFC → Opening → 相逢鹊渡 → 前世 → 今世 → 山高路远（双向
 
 ### Phase 6 — 山高路远（全站高潮）
 
-- [ ] 分屏双向奔赴；日落停驻；锁链轻断；拥抱后骤静  
-- [ ] ACT V 曲目链 + intensity scrub；金句字幕  
+- [x] 分屏双向奔赴；日落停驻；锁链轻断；拥抱后骤静  
+- [x] ACT V 曲目链 + intensity scrub；金句字幕  
 
 ### Phase 7 — 我们 / Memories
 
-- [ ] 鹊桥时间线（灯笼节点）；漂浮记忆，非 Grid 相册  
-- [ ] 真实照片槽位可后续填充  
+- [x] 鹊桥时间线（灯笼节点）；漂浮记忆，非 Grid 相册  
+- [x] 真实照片槽位可后续填充  
 
 ### Phase 8 — Quiet Days + Letter
 
-- [ ] 极简留白；两杯茶；音乐几乎不随滚动躁动  
-- [ ] `/letter` 信纸展开；可打印/PDF（后置）  
+- [x] 极简留白；两杯茶；音乐几乎不随滚动躁动  
+- [x] `/letter` 信纸展开（卷轴内嵌信纸；PDF 后置）  
 
 ### Phase 9 — Ending + 彩蛋
 
-- [ ] 背影走向远方；More Days Together；QDQC ∞  
-- [ ] 「如果你已经看到这里…」双按钮殊途同归  
+- [x] 背影走向远方文案；More Days Together；QDQC ∞  
+- [x] 「如果你已经看到这里…」双按钮殊途同归  
 
 ### Phase 10 — Mobile / NFC / Polish
 

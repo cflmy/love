@@ -118,8 +118,8 @@ export const chapters: Chapter[] = [
     title: "山高路远",
     subtitle: "双向奔赴",
     navLabel: "06 山高路远",
-    scrollSpan: 2.4,
-    themeTrack: "towardYou",
+    scrollSpan: 5.2,
+    themeTrack: "journey",
     color: "#9C493E",
     copy: [
       "你别担心，太阳落山前我一定回来。",
