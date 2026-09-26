@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { chapters } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
 
@@ -42,6 +43,10 @@ export function ChapterNav() {
             </li>
           ))}
         </ul>
+        <div className="nav-extra">
+          <Link href="/card">NFC · Card</Link>
+          <Link href="/letter">Letter</Link>
+        </div>
       </div>
 
       <div className="pointer-events-none mt-6 h-24 w-[2px] overflow-hidden rounded bg-[#F7F3E9]/15">

@@ -16,7 +16,10 @@ export function OpeningGate() {
   const setAudioUnlocked = useStoryStore((s) => s.setAudioUnlocked);
   const setWorldReveal = useStoryStore((s) => s.setWorldReveal);
   const reduced = useStoryStore((s) => s.reducedMotion);
+  const entrySource = useStoryStore((s) => s.entrySource);
+  const visitCount = useStoryStore((s) => s.visitCount);
   const [busy, setBusy] = useState(false);
+  const returning = visitCount > 1;
 
   useEffect(() => {
     let cancelled = false;
@@ -53,7 +56,6 @@ export function OpeningGate() {
     await wait(reduced ? 600 : 1400);
 
     setPhase("portal");
-    // Ease world in while gate dissolves.
     const steps = reduced ? 6 : 18;
     for (let i = 1; i <= steps; i++) {
       setWorldReveal(i / steps);
@@ -74,6 +76,8 @@ export function OpeningGate() {
         "opening-gate",
         `phase-${phase}`,
         entered ? "is-entered" : "",
+        entrySource === "nfc" ? "from-nfc" : "",
+        returning ? "is-return" : "",
       ].join(" ")}
       data-phase={phase}
     >
@@ -83,7 +87,9 @@ export function OpeningGate() {
       <div className="opening-gate__mark" aria-hidden={phase === "silence"}>
         <span className="opening-gate__qdqc">QDQC</span>
         <span className="opening-gate__inf">∞</span>
-        <span className="opening-gate__tag">More Days Together</span>
+        <span className="opening-gate__tag">
+          {returning ? "你又回来了。" : "More Days Together"}
+        </span>
       </div>
 
       <div className="opening-gate__stage">
@@ -122,9 +128,15 @@ export function OpeningGate() {
         </div>
 
         <div className="opening-gate__copy">
-          <p className="opening-gate__line a">相逢鹊渡</p>
-          <p className="opening-gate__line b">相守情长</p>
-          <p className="opening-gate__line c">戴上耳机，会更好。</p>
+          <p className="opening-gate__line a">
+            {entrySource === "nfc" ? "You found the other side." : "相逢鹊渡"}
+          </p>
+          <p className="opening-gate__line b">
+            {entrySource === "nfc" ? "另一半的故事，正在等待你。" : "相守情长"}
+          </p>
+          <p className="opening-gate__line c">
+            {returning ? "再陪我走一段吧。" : "戴上耳机，会更好。"}
+          </p>
         </div>
 
         <button
@@ -133,7 +145,7 @@ export function OpeningGate() {
           onClick={runRitual}
           disabled={phase !== "invite" || busy}
         >
-          {ctaLabel(phase)}
+          {ctaLabel(phase, entrySource === "nfc")}
         </button>
 
         <p className="opening-gate__motto">
@@ -154,8 +166,8 @@ function flipClass(phase: OpeningPhase) {
   return "";
 }
 
-function ctaLabel(phase: OpeningPhase) {
-  if (phase === "invite") return "触碰鹊桥";
+function ctaLabel(phase: OpeningPhase, fromNfc: boolean) {
+  if (phase === "invite") return fromNfc ? "打开这张卡" : "触碰鹊桥";
   if (phase === "unlock" || phase === "card") return "听见了…";
   if (phase === "flip") return "另一面";
   if (phase === "butterfly") return "化蝶";

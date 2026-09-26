@@ -190,8 +190,9 @@ NFC → Opening → 相逢鹊渡 → 前世 → 今世 → 山高路远（双向
 
 ### Phase 10 — Mobile / NFC / Polish
 
-- [ ] 专属 `/card` 流程（对照 22）  
-- [ ] PWA / favicon / SEO / 加载门 / 二次访问彩蛋  
+- [x] 专属 `/card` `/card/front` `/card/back` 流程  
+- [x] PWA manifest / icons / SEO / 加载门 / 二次访问彩蛋 / low-power  
+- [x] `/letter` 独立路由  
 
 ---
 
