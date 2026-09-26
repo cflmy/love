@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+:root {
+  --moon-white: #f7f3e9;
+  --dai-qing: #172b49;
+  --mist-blue: #6f8fb7;
+  --butterfly-blue: #4e83b5;
+  --pale-gold: #c7a66a;
+  --cinnabar: #9c493e;
+  --night: #0a1128;
+  --deep-night: #050810;
+  --background: var(--deep-night);
+  --foreground: var(--moon-white);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-moon: var(--moon-white);
+  --color-dai: var(--dai-qing);
+  --color-mist: var(--mist-blue);
+  --color-butterfly: var(--butterfly-blue);
+  --color-gold: var(--pale-gold);
+  --color-cinnabar: var(--cinnabar);
+  --font-serif: var(--font-serif-display);
+  --font-serif-cn: var(--font-serif-chinese);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--deep-night);
+  color: var(--moon-white);
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-serif-chinese), var(--font-serif-display), serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--butterfly-blue) 45%, transparent);
+  color: var(--moon-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.card-frame {
+  box-shadow: 0 20px 80px rgba(78, 131, 181, 0.35);
+}
+
+.opening-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 1.4s ease;
+}
+
+.opening-gate.is-entered {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opening-gate__veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, #172b49 0%, #050810 70%);
+}
+
+.opening-gate__blur {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+}
+
+.opening-gate__panel {
+  position: relative;
+  width: min(92vw, 420px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.opening-gate__brand {
+  margin: 0;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.45em;
+  color: var(--pale-gold);
+}
+
+.opening-gate__card {
+  position: relative;
+  width: 180px;
+  height: 280px;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 20px 80px rgba(78, 131, 181, 0.35);
+  outline: 1px solid color-mix(in oklab, var(--pale-gold) 40%, transparent);
+  transition: transform 1.8s ease;
+}
+
+.opening-gate__card.is-awake {
+  transform: scale(1.1);
+}
+
+.opening-gate__titles h1 {
+  margin: 0;
+  font-family: var(--font-serif-chinese), serif;
+  font-size: 1.875rem;
+  letter-spacing: 0.08em;
+  color: var(--moon-white);
+}
+
+.opening-gate__titles .sub {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-serif-chinese), serif;
+  font-size: 1.125rem;
+  color: var(--mist-blue);
+}
+
+.opening-gate__titles .hint {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: color-mix(in oklab, var(--moon-white) 70%, transparent);
+}
+
+.opening-gate__cta {
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--pale-gold) 70%, transparent);
+  background: color-mix(in oklab, var(--moon-white) 10%, transparent);
+  color: var(--moon-white);
+  padding: 0.75rem 2rem;
+  font-family: var(--font-serif-chinese), serif;
+  letter-spacing: 0.2em;
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.opening-gate__cta:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--moon-white) 20%, transparent);
+}
+
+.opening-gate__cta:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.opening-gate__motto {
+  margin: 0;
+  max-width: 20rem;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: color-mix(in oklab, var(--mist-blue) 90%, transparent);
+}
+
+.chapter-panel {
+  padding: 2.5rem 1.75rem;
+  border-radius: 1.5rem;
+  backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in oklab, var(--pale-gold) 18%, transparent);
+}
+
+.chapter-panel.is-dark {
+  background: color-mix(in oklab, #050810 55%, transparent);
+  color: var(--moon-white);
+}
+
+.chapter-panel.is-light {
+  background: color-mix(in oklab, var(--moon-white) 88%, transparent);
+  color: var(--dai-qing);
+}
+
+.chapter-panel__eyebrow {
+  margin: 0 0 1rem;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  color: var(--pale-gold);
+}
+
+.chapter-panel.is-light .chapter-panel__eyebrow {
+  color: var(--cinnabar);
+}
+
+.chapter-panel__title {
+  margin: 0 0 2.5rem;
+  font-family: var(--font-serif-chinese), serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  letter-spacing: 0.06em;
+}
+
+.chapter-panel__lines {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.chapter-panel__lines p {
+  margin: 0;
+  font-family: var(--font-serif-chinese), serif;
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  line-height: 1.8;
+  opacity: 0.9;
+}

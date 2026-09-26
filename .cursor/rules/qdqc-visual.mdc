@@ -1,0 +1,34 @@
+---
+description: QDQC visual language, typography, navigation, and UI tone
+alwaysApply: true
+---
+
+# QDQC · Visual & UX
+
+## Composition
+
+- First viewport = one composition: brand, one headline, one line support, one CTA, one dominant world image.
+- No hero cards, badge stickers, stat strips, or floating promo chips on media.
+- Navigation is **not** a classic Navbar. Use a small **QDQC** mark → chapter list (`01 祈祷` … `09 明天`).
+
+## Typography
+
+- Latin: Cormorant Garamond / EB Garamond.
+- Chinese: Noto Serif SC / Source Han Serif.
+- Handwriting only sparingly (`More Days Together`, closing lines).
+- Text appears in sequence with silence between beats — never dump all copy at once.
+
+## Chapter rhythm
+
+```
+惊艳 → 神秘 → 浪漫 → 神话 → 温暖 → 紧张 → 高潮 → 安静 → 真实 → 温柔 → 未来
+```
+
+Quiet Days and Letter must drop spectacle. Letter may leave WebGL entirely.
+
+## Audio UX
+
+- Never autoplay with sound before a user gesture.
+- Gate with story CTA (e.g. 「触碰鹊桥」) that unlocks AudioContext.
+- Chapter themes crossfade; ambience is a separate layer from music.
+- Player UI is a tiny QDQC note control — not a stock media bar.

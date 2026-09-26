@@ -1,0 +1,31 @@
+---
+description: QDQC project non-negotiables — immutable sources, no downgrade, brand identity
+alwaysApply: true
+---
+
+# QDQC · Core Rules
+
+## Immutable sources
+
+- **Never modify** `docs/**` or `assert/**` (including rename, overwrite, recompress, crop-in-place).
+- Derived web assets live only under `web/public/` or `web/src/` via copy/export scripts.
+- Prefer referencing originals via read-only copy into `web/public/assert/` when needed.
+
+## No scheme downgrade
+
+- Do **not** simplify the product into a generic couple site, photo album, or card gallery.
+- Required pillars stay intact: **NFC Opening → Persistent WebGL World → Scroll Story Engine → MusicEngine**.
+- Forbidden substitutes: pink hearts, particle-heart spam, template Navbar, flat photo grids as primary gallery, single looping BGM replacing chapter OST.
+
+## Brand identity
+
+- Name: **QDQC · 鹊渡情长** · `love.qdqc.com`
+- Motto: Que dure, que câlin. / Quiet days, quiet cuddles. / 相逢鹊渡，相守情长.
+- Palette: 月白 `#F7F3E9` · 黛青 `#172B49` · 雾蓝 `#6F8FB7` · 蝶蓝 `#4E83B5` · 淡金 `#C7A66A` · 朱砂 `#9C493E` (sparingly).
+- Tone: Quiet Romance / Oriental Poetic Love — slow, cinematic, restrained bloom.
+
+## Quality bar
+
+- Expression must feel like **a digital love book / interactive film**, not a brochure.
+- Mobile-first (NFC entry). Desktop enhances width and depth; never desktop-only.
+- `prefers-reduced-motion`: keep story readable; reduce camera/particle intensity, never drop content.

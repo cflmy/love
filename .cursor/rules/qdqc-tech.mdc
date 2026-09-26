@@ -1,0 +1,37 @@
+---
+description: QDQC tech stack — Next.js, R3F, GSAP, Lenis, MusicEngine
+alwaysApply: true
+---
+
+# QDQC · Tech Stack
+
+## Canonical stack
+
+| Layer | Choice |
+| --- | --- |
+| App | Next.js (App Router) + TypeScript |
+| UI | React + Tailwind CSS |
+| 3D | Three.js + React Three Fiber + Drei + postprocessing |
+| Motion | **GSAP + ScrollTrigger only** (no Framer Motion / Anime / Locomotive) |
+| Scroll | Lenis, synced with GSAP ticker |
+| State | Zustand |
+| Audio | Howler.js behind `MusicEngine` |
+
+## Architecture
+
+- **One persistent WebGL Canvas** (`position: fixed`) for the whole story world. Never spawn a new WebGL context per chapter.
+- DOM story layer scrolls above the canvas; camera / lighting / objects scrub on the same `storyProgress`.
+- Build a thin **Story Engine**: chapter progress → camera + objects + text + music + particles.
+- Chapter data is declarative (`data/chapters.ts`); pages consume, not hardcode timelines.
+
+## Animation policy
+
+- Slow > many. Prefer scrubbed timelines over flashy loops.
+- Allow: butterfly flight, water, moon breath, bridge lamps, petal drift, night→dawn color.
+- Forbid: heart explosions, spinning headlines, unchecked 3D flex.
+
+## Performance from day one
+
+- Image: AVIF/WebP derivatives in `web/public` (sources untouched).
+- Load: Hero → current chapter → preload next.
+- Cap particles / bloom / DPR on mobile & low-power; respect reduced motion.

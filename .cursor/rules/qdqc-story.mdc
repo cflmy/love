@@ -1,0 +1,39 @@
+---
+description: Story Engine chapter order and scroll-camera contract
+globs: web/src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# QDQC · Story Engine
+
+## Experience spine
+
+```
+NFC/card → Opening → 相逢鹊渡 → 前世 → 今世 → 山高路远(双向奔赴)
+→ 我们/Memories → Quiet Days → Letter → Future → ∞ / More Days
+```
+
+Routes may exist (`/card`, `/story`, `/letter`) but the default experience is one continuous world.
+
+## Progress contract
+
+Every chapter exposes `progress 0→1` driving:
+
+- camera position / lookAt
+- layer parallax
+- object visibility / morph
+- typography opacity / stagger
+- music intensity / theme / ambience
+
+## First vertical slice (ship quality before breadth)
+
+1. NFC awaken + audio unlock  
+2. Butterfly portal into world  
+3. River crossing → Magpie → Bridge lamps  
+4. Title: 相逢鹊渡 / 相守情长  
+
+Do not open all chapters until this slice meets the cinematic bar.
+
+## Depth layers
+
+`sky → moon/mountains → water/bridge → characters/creatures → DOM text/UI`

@@ -1,0 +1,43 @@
+---
+description: How to use assert/ images and music without mutating sources
+globs: web/**/*.{ts,tsx,js,jsx,css,md}
+alwaysApply: false
+---
+
+# QDQC · Asset Usage
+
+## Source of truth
+
+- Raw files: `assert/image/*.png`, `assert/music/*.mp4` (actually AAC/M4A audio).
+- App consumes copies under `web/public/` only.
+- Registry: `web/src/data/assets.ts` maps id → path → chapter → role.
+
+## Image map (sheet → role)
+
+| File | Role |
+| --- | --- |
+| `001`–`002` | Logo / brand mark variants |
+| `003`–`006` | NFC card + character posters |
+| `007` `011` | Desktop / ending hero references |
+| `008` | Butterfly poses + flight sequence |
+| `009` | Magpie poses + flight sequence |
+| `010` | Magpie bridge layers / times of day |
+| `012`–`13` `16`–`18` | Storyboard / scene boards |
+| `14` `15` | Present-life memory chapters |
+| `19`–`22` | UI kit (desktop + mobile) |
+
+Treat sheets as **design references**. Crop export layers into `web/public/media/` when implementing; do not edit sheets in place.
+
+## Music map → chapters
+
+| Track | Chapter |
+| --- | --- |
+| `PROLOGUE 01` | NFC / Touch |
+| `ACT I 02` / `03` | Prayer / Response |
+| `ACT II 04` / `05` | Butterfly / Magpie Bridge |
+| `ACT III・前世` + `07` `08` | Past |
+| `ACT IV・今世` + `10` | Present / Quiet Days |
+| `ACT V・山高路远` + `12`–`14` | Journey climax |
+| `ACT VI 15` + `16` `17` | Return / Reprise / Ending |
+
+Copy as `.m4a` into `web/public/audio/`; decode via Howler. Prefer stems later; v1 uses full mixes + crossfade.
