@@ -395,25 +395,7 @@ body {
 }
 
 .opening-gate__cta {
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--pale-gold) 70%, transparent);
-  background: color-mix(in oklab, var(--moon-white) 10%, transparent);
-  color: var(--moon-white);
-  padding: 0.75rem 2rem;
-  font-family: var(--font-serif-chinese), serif;
-  letter-spacing: 0.2em;
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-  transition: background 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
-}
-
-.opening-gate__cta:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--moon-white) 20%, transparent);
-}
-
-.opening-gate__cta:disabled {
-  opacity: 0.55;
-  cursor: default;
+  margin-top: 0.35rem;
 }
 
 .opening-gate.phase-silence .opening-gate__cta,
@@ -958,6 +940,123 @@ body {
   color: #ffd7a4;
 }
 
+/* —— Meeting title overlay (blur → focus) —— */
+.meeting-title {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  z-index: 28;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 560px);
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.2s linear;
+}
+
+.meeting-title__line {
+  margin: 0;
+  font-family: var(--font-serif-chinese), serif;
+  letter-spacing: 0.18em;
+  color: var(--moon-white);
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+  will-change: transform, filter, opacity;
+}
+
+.meeting-title__line.a {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+}
+
+.meeting-title__line.b {
+  margin-top: 0.85rem;
+  font-size: clamp(1.35rem, 3.6vw, 2rem);
+  color: color-mix(in oklab, var(--pale-gold) 85%, white);
+}
+
+.meeting-title__line.c {
+  margin-top: 1.35rem;
+  font-size: clamp(0.95rem, 2.4vw, 1.2rem);
+  letter-spacing: 0.28em;
+  opacity: 0.9;
+}
+
+/* —— Art buttons (UI kit) —— */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.art-button {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --shift-x: 0px;
+  --shift-y: 0px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: var(--btn-w, 280px);
+  min-height: 48px;
+  padding: 0.35rem 0.2rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: perspective(700px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y))
+    translate3d(var(--shift-x), var(--shift-y), 0);
+  transition: transform 0.18s ease, filter 0.25s ease, opacity 0.35s ease;
+  filter: brightness(0.96);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.art-button__img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.35));
+}
+
+.art-button__glow {
+  position: absolute;
+  inset: 18% 8%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(199, 166, 106, 0.28), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.art-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.art-button:hover:not(:disabled) .art-button__glow {
+  opacity: 1;
+}
+
+.art-button:active:not(:disabled) {
+  transform: perspective(700px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y))
+    translate3d(var(--shift-x), calc(var(--shift-y) + 1px), 0) scale(0.96);
+  filter: brightness(0.94);
+}
+
+.art-button:disabled {
+  opacity: 0.55;
+  cursor: default;
+  filter: grayscale(0.15) brightness(0.9);
+}
+
+.art-button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--pale-gold) 70%, transparent);
+  outline-offset: 6px;
+  border-radius: 12px;
+}
+
 @media (max-width: 720px) {
   .scene-beat--pair .scene-beat__frame,
   .scene-beat--split .scene-beat__frame,
@@ -1472,23 +1571,10 @@ body {
 
 .ending-egg__actions {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  justify-content: center;
   margin-top: 0.75rem;
-}
-
-.ending-egg__actions button {
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--pale-gold) 55%, transparent);
-  background: transparent;
-  color: var(--moon-white);
-  padding: 0.65rem 1.4rem;
-  font-family: var(--font-serif-chinese), serif;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-}
-
-.ending-egg__actions button:hover {
-  background: color-mix(in oklab, var(--moon-white) 10%, transparent);
 }
 
 .ending-egg.is-done p {

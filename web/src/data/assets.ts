@@ -157,6 +157,19 @@ export const parts = {
   ],
 } as const;
 
+/** UI kit buttons extracted from sheets 19 / 22 — use as world CTAs, not CSS pills. */
+export const uiButtons = {
+  start: "/media/parts/ui-btn-start.webp",
+  next: "/media/parts/ui-btn-next.webp",
+  prev: "/media/parts/ui-btn-prev.webp",
+  more: "/media/parts/ui-btn-more.webp",
+  music: "/media/parts/ui-btn-music.webp",
+  pause: "/media/parts/ui-btn-pause.webp",
+  memory: "/media/parts/ui-btn-memory.webp",
+  primaryMobile: "/media/parts/ui-btn-primary-mobile.webp",
+  secondaryMobile: "/media/parts/ui-btn-secondary-mobile.webp",
+} as const;
+
 /** Brand marks from assert/zip 001–002 (manual slices). */
 export const brand = {
   /** Portrait logo tile — loading / nav mark */

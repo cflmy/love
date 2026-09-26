@@ -72,11 +72,12 @@ export function StoryChapters() {
         .map((beat) => (
           <SceneBeatView key={beat.id} beat={beat} />
         ))}
+      {/* Title is a fixed cinematic overlay (MeetingTitle); bridge settle is quiet. */}
       <ChapterHero
         image={crops.bridgeFull}
         title={chapters[3].title}
         subtitle={chapters[3].subtitle}
-        lines={chapters[3].copy}
+        lines={["桥灯亮起的地方，", "就是我们相遇的地方。"]}
         overlay={parts.magpieSpread}
       />
 

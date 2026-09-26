@@ -6,6 +6,7 @@ import { OpeningGate } from "@/components/opening/OpeningGate";
 import { StoryChapters } from "@/components/story/StoryChapters";
 import { EraFlash } from "@/components/story/EraFlash";
 import { JourneySubtitles } from "@/components/story/JourneySubtitles";
+import { MeetingTitle } from "@/components/story/MeetingTitle";
 import { ChapterNav } from "@/components/ui/ChapterNav";
 import { MusicToggle } from "@/components/ui/MusicToggle";
 import { AtmosphereField } from "@/components/ui/AtmosphereField";
@@ -28,6 +29,7 @@ export function Experience() {
               <StoryChapters />
             </ScrollSync>
             <JourneySubtitles />
+            <MeetingTitle />
             <EraFlash />
             <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 h-32 bg-gradient-to-t from-[#050810]/80 to-transparent" />
           </main>

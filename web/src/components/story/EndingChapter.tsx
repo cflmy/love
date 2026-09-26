@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { brand, crops, parts } from "@/data/assets";
+import { ArtButton } from "@/components/ui/ArtButton";
 
 /** Ending coda — never THE END. */
 export function EndingChapter() {
@@ -48,12 +49,8 @@ export function EndingChapter() {
           <p>如果你已经看到这里……</p>
           <p>再陪我走一段吧。</p>
           <div className="ending-egg__actions">
-            <button type="button" onClick={() => setChoice("yes")}>
-              好
-            </button>
-            <button type="button" onClick={() => setChoice("ofcourse")}>
-              当然
-            </button>
+            <ArtButton variant="next" label="好" width={200} onClick={() => setChoice("yes")} />
+            <ArtButton variant="memory" label="当然" width={220} onClick={() => setChoice("ofcourse")} />
           </div>
         </div>
       ) : (

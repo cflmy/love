@@ -5,6 +5,7 @@ import Image from "next/image";
 import { brand, crops, parts } from "@/data/assets";
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore, type OpeningPhase } from "@/store/story";
+import { ArtButton } from "@/components/ui/ArtButton";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -156,14 +157,14 @@ export function OpeningGate() {
           </p>
         </div>
 
-        <button
-          type="button"
+        <ArtButton
           className="opening-gate__cta"
+          variant="start"
+          label={ctaLabel(phase, entrySource === "nfc")}
+          width={300}
           onClick={runRitual}
           disabled={phase !== "invite" || busy}
-        >
-          {ctaLabel(phase, entrySource === "nfc")}
-        </button>
+        />
 
         <p className="opening-gate__motto">
           Que dure, que câlin.
