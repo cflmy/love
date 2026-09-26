@@ -128,35 +128,35 @@ NFC → Opening → 相逢鹊渡 → 前世 → 今世 → 山高路远（双向
 
 ### Phase 0 — Foundation（当前）
 
-- [ ] Next.js + TS + Tailwind + R3F + GSAP + Lenis + Zustand + Howler
-- [ ] `sync-assets` 脚本
-- [ ] Design tokens（色板、字体、间距）
-- [ ] `StoryEngine` + `ScrollSync` 骨架
-- [ ] `MusicEngine` 骨架 + 用户手势解锁
-- [ ] Cursor Rules（已完成）
+- [x] Next.js + TS + Tailwind + R3F + GSAP + Lenis + Zustand + Howler
+- [x] `sync-assets` 脚本
+- [x] Design tokens（色板、字体、间距）
+- [x] `StoryEngine` + `ScrollSync` 骨架
+- [x] `MusicEngine` 骨架 + 用户手势解锁
+- [x] Cursor Rules（已完成）
 
 ### Phase 1 — QDQC World
 
-- [ ] 持久 Canvas：Moon / Mountains / Water / Clouds / Bridge
-- [ ] Butterfly / Magpie 精灵或纹理平面 + 简单翼振
-- [ ] 五层视差与基础 bloom（克制）
-- [ ] 性能档位：desktop / mobile / reduced-motion
+- [x] 持久 Canvas：Moon / Mountains / Water / Clouds / Bridge
+- [x] Butterfly / Magpie 精灵或纹理平面 + 简单翼振
+- [x] 五层视差与基础 bloom（克制）
+- [x] 性能档位：desktop / mobile / reduced-motion
 
 ### Phase 2 — Opening 垂直切片（质量闸门）
 
 必须达到「惊艳」后再铺开其他章：
 
-1. 米白/黑场 → 小 QDQC → 「触碰鹊桥」解锁音频  
-2. PROLOGUE 铃/水 → NFC 卡出现并翻转（003）  
-3. 卡 → 蝴蝶（008）飞入门户  
-4. Camera 推入月夜鹊桥世界（007/010/011）  
-5. 文案节拍：Que dure… → 愿天长地久…  
+1. [x] 米白/黑场 → 小 QDQC → 「触碰鹊桥」解锁音频  
+2. [x] PROLOGUE 铃/水 → NFC 卡出现并翻转（003）  
+3. [x] 卡 → 蝴蝶飞入门户  
+4. [x] Camera 推入月夜鹊桥世界（007/010/011）  
+5. [x] 文案节拍：Que dure… → 愿天长地久…  
 
 ### Phase 3 — 相逢鹊渡
 
-- [ ] 蝶渡河 → 鹊出现 → 双轨迹靠近 → 桥灯逐亮  
-- [ ] ACT II 04→05 crossfade；左右声道主题汇合感  
-- [ ] 后置标题：相逢鹊渡 / 相守情长 / 故与君鹊渡情长  
+- [x] 蝶渡河 → 鹊出现 → 双轨迹靠近 → 桥灯逐亮  
+- [x] ACT II 04→05 crossfade；章节内进度切换主题  
+- [x] 后置标题：相逢鹊渡 / 相守情长 / 故与君鹊渡情长（先 WatchBeat）
 
 ### Phase 4 — 前世
 

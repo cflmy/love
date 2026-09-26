@@ -7,18 +7,31 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { chapterProgressBounds, chapters } from "@/data/chapters";
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore } from "@/store/story";
-import { audio } from "@/data/assets";
+import type { audio } from "@/data/assets";
 
 gsap.registerPlugin(ScrollTrigger);
+
+type TrackId = keyof typeof audio;
+
+function trackForChapter(id: string, local: number): TrackId | null {
+  const chapter = chapters.find((c) => c.id === id);
+  if (!chapter?.themeTrack) return null;
+  if (id === "meeting") {
+    return local < 0.55 ? "butterfly" : "magpieBridge";
+  }
+  return chapter.themeTrack;
+}
 
 export function ScrollSync({ children }: { children: React.ReactNode }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const setProgress = useStoryStore((s) => s.setProgress);
   const setChapterId = useStoryStore((s) => s.setChapterId);
+  const setChapterLocal = useStoryStore((s) => s.setChapterLocal);
   const setIntensity = useStoryStore((s) => s.setIntensity);
   const entered = useStoryStore((s) => s.entered);
   const musicEnabled = useStoryStore((s) => s.musicEnabled);
   const audioUnlocked = useStoryStore((s) => s.audioUnlocked);
+  const lastTrack = useRef<TrackId | null>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -56,8 +69,19 @@ export function ScrollSync({ children }: { children: React.ReactNode }) {
         setIntensity(Math.sin(p * Math.PI));
         const chapter =
           bounds.find((b) => p >= b.start && p < b.end) ?? bounds[bounds.length - 1];
+        const span = Math.max(0.0001, chapter.end - chapter.start);
+        const local = (p - chapter.start) / span;
         setChapterId(chapter.id);
-        MusicEngine.setIntensity(0.35 + p * 0.65);
+        setChapterLocal(local);
+
+        if (useStoryStore.getState().audioUnlocked && useStoryStore.getState().musicEnabled) {
+          const track = trackForChapter(chapter.id, local);
+          if (track && track !== lastTrack.current) {
+            lastTrack.current = track;
+            MusicEngine.play(track, chapter.id === "meeting" ? 2200 : 1600);
+          }
+          MusicEngine.setIntensity(0.35 + p * 0.65);
+        }
       },
     });
 
@@ -66,26 +90,18 @@ export function ScrollSync({ children }: { children: React.ReactNode }) {
       gsap.ticker.remove(ticker);
       lenis.destroy();
     };
-  }, [entered, setProgress, setChapterId, setIntensity]);
+  }, [entered, setProgress, setChapterId, setChapterLocal, setIntensity]);
 
   useEffect(() => {
     if (!entered || !audioUnlocked) return;
-    const chapter = chapters.find((c) => c.id === useStoryStore.getState().chapterId);
-    if (!chapter?.themeTrack) return;
     MusicEngine.setEnabled(musicEnabled);
-    MusicEngine.play(chapter.themeTrack as keyof typeof audio);
-  }, [entered, audioUnlocked, musicEnabled]);
-
-  useEffect(() => {
-    if (!entered || !audioUnlocked || !musicEnabled) return;
-    const unsub = useStoryStore.subscribe((state, prev) => {
-      if (state.chapterId === prev.chapterId) return;
-      const chapter = chapters.find((c) => c.id === state.chapterId);
-      if (chapter?.themeTrack) {
-        MusicEngine.play(chapter.themeTrack as keyof typeof audio);
-      }
-    });
-    return unsub;
+    if (!musicEnabled) return;
+    const { chapterId, chapterLocal } = useStoryStore.getState();
+    const track = trackForChapter(chapterId, chapterLocal);
+    if (track) {
+      lastTrack.current = track;
+      MusicEngine.play(track);
+    }
   }, [entered, audioUnlocked, musicEnabled]);
 
   return (

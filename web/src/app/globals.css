@@ -59,6 +59,7 @@ body {
   box-shadow: 0 20px 80px rgba(78, 131, 181, 0.35);
 }
 
+/* —— Opening ritual —— */
 .opening-gate {
   position: fixed;
   inset: 0;
@@ -66,79 +67,356 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 1.4s ease;
+  perspective: 1200px;
+  transition: opacity 1.6s ease, visibility 1.6s ease;
 }
 
-.opening-gate.is-entered {
+.opening-gate.is-entered,
+.opening-gate.phase-done {
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
 }
 
 .opening-gate__veil {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, #172b49 0%, #050810 70%);
+  background: #f7f3e9;
+  transition: background 1.4s ease, opacity 1.2s ease;
 }
 
-.opening-gate__blur {
+.opening-gate.phase-silence .opening-gate__veil,
+.opening-gate.phase-mark .opening-gate__veil {
+  background: #f7f3e9;
+}
+
+.opening-gate.phase-invite .opening-gate__veil,
+.opening-gate.phase-unlock .opening-gate__veil,
+.opening-gate.phase-card .opening-gate__veil,
+.opening-gate.phase-flip .opening-gate__veil {
+  background: radial-gradient(ellipse at center, #172b49 0%, #050810 72%);
+}
+
+.opening-gate.phase-butterfly .opening-gate__veil,
+.opening-gate.phase-portal .opening-gate__veil {
+  background: radial-gradient(ellipse at center, #0a1a38 0%, #02040a 75%);
+}
+
+.opening-gate__stars {
   position: absolute;
   inset: 0;
-  opacity: 0.4;
+  opacity: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(247, 243, 233, 0.7), transparent),
+    radial-gradient(1px 1px at 70% 20%, rgba(199, 166, 106, 0.55), transparent),
+    radial-gradient(1.5px 1.5px at 40% 70%, rgba(111, 143, 183, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 60%, rgba(247, 243, 233, 0.5), transparent);
+  transition: opacity 1.2s ease;
+  pointer-events: none;
 }
 
-.opening-gate__panel {
+.opening-gate.phase-invite .opening-gate__stars,
+.opening-gate.phase-unlock .opening-gate__stars,
+.opening-gate.phase-card .opening-gate__stars,
+.opening-gate.phase-flip .opening-gate__stars,
+.opening-gate.phase-butterfly .opening-gate__stars,
+.opening-gate.phase-portal .opening-gate__stars {
+  opacity: 1;
+}
+
+.opening-gate__mark {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0;
+  transition: opacity 1s ease, transform 1.2s ease;
+  z-index: 2;
+}
+
+.opening-gate.phase-mark .opening-gate__mark,
+.opening-gate.phase-invite .opening-gate__mark {
+  opacity: 1;
+}
+
+.opening-gate.phase-card .opening-gate__mark,
+.opening-gate.phase-flip .opening-gate__mark,
+.opening-gate.phase-butterfly .opening-gate__mark,
+.opening-gate.phase-portal .opening-gate__mark,
+.opening-gate.phase-unlock .opening-gate__mark {
+  opacity: 0.35;
+  transform: translateX(-50%) translateY(-12px) scale(0.92);
+}
+
+.opening-gate__qdqc {
+  font-family: var(--font-serif-display), serif;
+  letter-spacing: 0.45em;
+  font-size: 0.85rem;
+  color: #172b49;
+}
+
+.opening-gate.phase-invite .opening-gate__qdqc,
+.opening-gate.phase-unlock .opening-gate__qdqc,
+.opening-gate.phase-card .opening-gate__qdqc,
+.opening-gate.phase-flip .opening-gate__qdqc,
+.opening-gate.phase-butterfly .opening-gate__qdqc,
+.opening-gate.phase-portal .opening-gate__qdqc {
+  color: var(--pale-gold);
+}
+
+.opening-gate__inf {
+  color: var(--pale-gold);
+  font-size: 1.1rem;
+}
+
+.opening-gate__tag {
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: color-mix(in oklab, #172b49 55%, transparent);
+}
+
+.opening-gate.phase-invite .opening-gate__tag,
+.opening-gate.phase-unlock .opening-gate__tag,
+.opening-gate.phase-card .opening-gate__tag {
+  color: color-mix(in oklab, var(--moon-white) 55%, transparent);
+}
+
+.opening-gate__stage {
   position: relative;
+  z-index: 3;
   width: min(92vw, 420px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 0 1.5rem;
+  gap: 1.75rem;
   text-align: center;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
 }
 
-.opening-gate__brand {
-  margin: 0;
-  font-family: var(--font-serif-display), serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.45em;
-  color: var(--pale-gold);
+.opening-gate.phase-invite .opening-gate__stage,
+.opening-gate.phase-unlock .opening-gate__stage,
+.opening-gate.phase-card .opening-gate__stage,
+.opening-gate.phase-flip .opening-gate__stage,
+.opening-gate.phase-butterfly .opening-gate__stage,
+.opening-gate.phase-portal .opening-gate__stage {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.opening-gate__card {
+.nfc-stage {
   position: relative;
   width: 180px;
   height: 280px;
-  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.92) translateY(20px);
+  transition: opacity 1s ease, transform 1.1s ease;
+}
+
+.nfc-stage.is-visible,
+.nfc-stage.is-flipped {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.nfc-card {
+  width: 100%;
+  height: 100%;
+  perspective: 1400px;
+}
+
+.nfc-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1.35s cubic-bezier(0.4, 0.05, 0.2, 1);
+}
+
+.nfc-stage.is-flipped .nfc-card__inner {
+  transform: rotateY(180deg);
+}
+
+.nfc-face {
+  position: absolute;
+  inset: 0;
   border-radius: 18px;
-  box-shadow: 0 20px 80px rgba(78, 131, 181, 0.35);
+  overflow: hidden;
+  backface-visibility: hidden;
+  box-shadow: 0 24px 70px rgba(78, 131, 181, 0.38);
   outline: 1px solid color-mix(in oklab, var(--pale-gold) 40%, transparent);
-  transition: transform 1.8s ease;
 }
 
-.opening-gate__card.is-awake {
-  transform: scale(1.1);
+.nfc-face--back {
+  transform: rotateY(180deg);
 }
 
-.opening-gate__titles h1 {
+.nfc-face__img {
+  object-fit: cover !important;
+}
+
+.nfc-face__img--front {
+  object-position: 12% center !important;
+  transform: scale(1.85);
+  transform-origin: left center;
+}
+
+.nfc-face__img--back {
+  object-position: 88% center !important;
+  transform: scale(1.85);
+  transform-origin: right center;
+}
+
+.opening-butterfly {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 54px;
+  height: 40px;
+  margin-left: -27px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.opening-gate.phase-butterfly .opening-butterfly,
+.opening-gate.phase-portal .opening-butterfly {
+  opacity: 1;
+  animation: butterfly-depart 1.6s ease-in forwards;
+}
+
+.opening-gate.phase-butterfly .nfc-card,
+.opening-gate.phase-portal .nfc-card {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.8s ease, transform 1s ease;
+}
+
+.opening-butterfly__wing {
+  position: absolute;
+  top: 4px;
+  width: 22px;
+  height: 30px;
+  border-radius: 70% 70% 60% 60%;
+  background: linear-gradient(135deg, #6f8fb7, #4e83b5 55%, #172b49);
+  box-shadow: 0 0 18px rgba(78, 131, 181, 0.65);
+  animation: wing-flap 0.28s ease-in-out infinite alternate;
+}
+
+.opening-butterfly__wing.left {
+  left: 2px;
+  transform-origin: right center;
+}
+
+.opening-butterfly__wing.right {
+  right: 2px;
+  transform-origin: left center;
+  animation-delay: 0.05s;
+}
+
+.opening-butterfly__body {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 5px;
+  height: 24px;
+  margin-left: -2.5px;
+  border-radius: 999px;
+  background: #172b49;
+}
+
+.opening-butterfly__trail {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 2px;
+  height: 48px;
+  margin-left: -1px;
+  background: linear-gradient(to bottom, rgba(199, 166, 106, 0.7), transparent);
+  opacity: 0.7;
+}
+
+@keyframes wing-flap {
+  from {
+    transform: rotateY(18deg) rotateZ(-8deg);
+  }
+  to {
+    transform: rotateY(-28deg) rotateZ(6deg);
+  }
+}
+
+@keyframes butterfly-depart {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(40px, -160px) scale(0.35);
+    opacity: 0;
+  }
+}
+
+.opening-gate__copy {
+  min-height: 5.5rem;
+}
+
+.opening-gate__line {
   margin: 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
   font-family: var(--font-serif-chinese), serif;
-  font-size: 1.875rem;
-  letter-spacing: 0.08em;
+}
+
+.opening-gate__line.a {
+  font-size: 1.75rem;
+  letter-spacing: 0.18em;
   color: var(--moon-white);
 }
 
-.opening-gate__titles .sub {
-  margin: 0.5rem 0 0;
-  font-family: var(--font-serif-chinese), serif;
-  font-size: 1.125rem;
+.opening-gate__line.b {
+  margin-top: 0.4rem;
+  font-size: 1.15rem;
   color: var(--mist-blue);
 }
 
-.opening-gate__titles .hint {
-  margin: 0.75rem 0 0;
-  font-size: 0.875rem;
-  color: color-mix(in oklab, var(--moon-white) 70%, transparent);
+.opening-gate__line.c {
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+  color: color-mix(in oklab, var(--moon-white) 65%, transparent);
+}
+
+.opening-gate.phase-invite .opening-gate__line.a,
+.opening-gate.phase-invite .opening-gate__line.b,
+.opening-gate.phase-invite .opening-gate__line.c,
+.opening-gate.phase-unlock .opening-gate__line.a,
+.opening-gate.phase-unlock .opening-gate__line.b,
+.opening-gate.phase-unlock .opening-gate__line.c,
+.opening-gate.phase-card .opening-gate__line.a,
+.opening-gate.phase-card .opening-gate__line.b {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.opening-gate.phase-flip .opening-gate__line.a,
+.opening-gate.phase-flip .opening-gate__line.b,
+.opening-gate.phase-butterfly .opening-gate__line.a,
+.opening-gate.phase-butterfly .opening-gate__line.b {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.opening-gate.phase-card .opening-gate__line.c,
+.opening-gate.phase-flip .opening-gate__line.c,
+.opening-gate.phase-butterfly .opening-gate__line.c,
+.opening-gate.phase-portal .opening-gate__line.c {
+  opacity: 0;
 }
 
 .opening-gate__cta {
@@ -151,7 +429,7 @@ body {
   letter-spacing: 0.2em;
   backdrop-filter: blur(12px);
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, opacity 0.4s ease, transform 0.4s ease;
 }
 
 .opening-gate__cta:hover:not(:disabled) {
@@ -159,8 +437,14 @@ body {
 }
 
 .opening-gate__cta:disabled {
-  opacity: 0.7;
+  opacity: 0.55;
   cursor: default;
+}
+
+.opening-gate.phase-silence .opening-gate__cta,
+.opening-gate.phase-mark .opening-gate__cta {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .opening-gate__motto {
@@ -169,6 +453,56 @@ body {
   font-size: 0.75rem;
   line-height: 1.7;
   color: color-mix(in oklab, var(--mist-blue) 90%, transparent);
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.opening-gate.phase-invite .opening-gate__motto,
+.opening-gate.phase-unlock .opening-gate__motto {
+  opacity: 1;
+}
+
+.opening-gate__portal {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(78, 131, 181, 0.45), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.opening-gate.phase-portal .opening-gate__portal {
+  opacity: 1;
+  animation: portal-pulse 1.1s ease-out;
+}
+
+@keyframes portal-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.chapter-watch {
+  min-height: 100svh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1.5rem 18vh;
+  pointer-events: none;
+}
+
+.chapter-watch__hint {
+  margin: 0;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  color: color-mix(in oklab, var(--pale-gold) 70%, transparent);
+  opacity: 0.7;
 }
 
 .chapter-panel {
@@ -218,4 +552,13 @@ body {
   font-size: clamp(1.05rem, 2.4vw, 1.25rem);
   line-height: 1.8;
   opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nfc-card__inner,
+  .opening-butterfly,
+  .opening-gate__portal {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
 }

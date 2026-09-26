@@ -17,9 +17,7 @@ function ChapterBlock({
   const light = tone === "light";
   return (
     <section className="flex min-h-[100svh] items-center justify-center px-6 py-24">
-      <div
-        className={`chapter-panel mx-auto max-w-xl text-center ${light ? "is-light" : "is-dark"}`}
-      >
+      <div className={`chapter-panel mx-auto max-w-xl text-center ${light ? "is-light" : "is-dark"}`}>
         <p className="chapter-panel__eyebrow">{subtitle}</p>
         <h2 className="chapter-panel__title">{title}</h2>
         <div className="chapter-panel__lines">
@@ -32,6 +30,14 @@ function ChapterBlock({
   );
 }
 
+function WatchBeat({ hint }: { hint: string }) {
+  return (
+    <section className="chapter-watch">
+      <p className="chapter-watch__hint">{hint}</p>
+    </section>
+  );
+}
+
 export function StoryChapters() {
   const entered = useStoryStore((s) => s.entered);
   if (!entered) {
@@ -39,16 +45,11 @@ export function StoryChapters() {
   }
 
   return (
-    <div style={{ height: `${STORY_SCROLL_VH}svh` }} className="relative">
+    <div style={{ minHeight: `${STORY_SCROLL_VH}svh` }} className="relative">
       <ChapterBlock
         title="QDQC"
         subtitle="A quieter, brighter tomorrow."
-        lines={[
-          "Que dure",
-          "que câlin",
-          "愿天长地久",
-          "愿紧紧相拥",
-        ]}
+        lines={["Que dure", "que câlin", "愿天长地久", "愿紧紧相拥"]}
       />
       <ChapterBlock
         title={chapters[1].title}
@@ -61,11 +62,18 @@ export function StoryChapters() {
         lines={chapters[2].copy}
         tone="light"
       />
+
+      {/* Phase 3: look first, read later */}
+      <WatchBeat hint="看" />
+      <WatchBeat hint="她渡河" />
+      <WatchBeat hint="他从远方来" />
+      <WatchBeat hint="桥灯亮起" />
       <ChapterBlock
         title={chapters[3].title}
         subtitle={chapters[3].subtitle}
         lines={chapters[3].copy}
       />
+
       <ChapterBlock
         title={chapters[4].title}
         subtitle={chapters[4].subtitle}
