@@ -24,11 +24,44 @@ function Backdrop() {
   texture.colorSpace = THREE.SRGBColorSpace;
   const progress = useStoryStore((s) => s.progress);
   const reveal = useStoryStore((s) => s.worldReveal);
+  const past = useChapterLocal("past");
+  const present = useChapterLocal("present");
+  const fade = 1 - THREE.MathUtils.smoothstep(past, 0.05, 0.35) + THREE.MathUtils.smoothstep(present, 0.7, 1) * 0.35;
 
   return (
     <mesh position={[0, 0.15 - progress * 0.7, -8]} scale={[14.2, 8, 1]}>
       <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={texture} transparent opacity={0.88 * reveal} />
+      <meshBasicMaterial map={texture} transparent opacity={0.88 * reveal * Math.max(0.15, fade)} />
+    </mesh>
+  );
+}
+
+function PastPlate() {
+  const texture = useTexture(images.storyBoardB);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const past = useChapterLocal("past");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const opacity = THREE.MathUtils.smoothstep(past, 0.02, 0.25) * (1 - THREE.MathUtils.smoothstep(past, 0.88, 1)) * 0.72 * reveal;
+
+  return (
+    <mesh position={[0, 0.1, -5.2]} scale={[11.5, 6.5, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={texture} transparent opacity={opacity} />
+    </mesh>
+  );
+}
+
+function PresentPlate() {
+  const texture = useTexture(images.presentFive);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const present = useChapterLocal("present");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const opacity = THREE.MathUtils.smoothstep(present, 0.08, 0.35) * 0.55 * reveal;
+
+  return (
+    <mesh position={[0, -0.05, -4.6]} scale={[10.8, 6.1, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={texture} transparent opacity={opacity} />
     </mesh>
   );
 }
@@ -66,15 +99,18 @@ function Moon() {
   const ref = useRef<THREE.Mesh>(null);
   const progress = useStoryStore((s) => s.progress);
   const reveal = useStoryStore((s) => s.worldReveal);
+  const past = useChapterLocal("past");
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
     const breath = 1 + Math.sin(clock.elapsedTime * 0.4) * 0.015;
-    ref.current.scale.setScalar(breath * (0.7 + reveal * 0.3));
-    ref.current.position.y = 2.4 + progress * 0.35;
+    const myth = 1 + past * 0.25;
+    ref.current.scale.setScalar(breath * (0.7 + reveal * 0.3) * myth);
+    ref.current.position.y = 2.4 + progress * 0.35 + past * 0.2;
     ref.current.position.x = 2.6 - progress * 0.9;
     const mat = ref.current.material as THREE.MeshBasicMaterial;
     mat.opacity = 0.25 + reveal * 0.67;
+    mat.color.set(past > 0.2 ? "#FFE6B8" : "#F7F3E9");
   });
 
   return (
@@ -87,21 +123,49 @@ function Moon() {
 
 function Water() {
   const ref = useRef<THREE.Mesh>(null);
+  const past = useChapterLocal("past");
   useFrame(({ clock }) => {
     if (!ref.current) return;
     ref.current.position.y = -1.55 + Math.sin(clock.elapsedTime * 0.55) * 0.03;
+    const mat = ref.current.material as THREE.MeshStandardMaterial;
+    mat.color.set(past > 0.15 ? "#2a1848" : "#1a3358");
   });
   return (
     <mesh ref={ref} rotation={[-Math.PI / 2.05, 0, 0]} position={[0, -1.55, -2]}>
       <planeGeometry args={[20, 10, 32, 32]} />
-      <meshStandardMaterial
-        color="#1a3358"
-        metalness={0.65}
-        roughness={0.25}
-        transparent
-        opacity={0.55}
-      />
+      <meshStandardMaterial color="#1a3358" metalness={0.65} roughness={0.25} transparent opacity={0.55} />
     </mesh>
+  );
+}
+
+function WindCloudInfinity() {
+  const group = useRef<THREE.Group>(null);
+  const past = useChapterLocal("past");
+
+  useFrame(({ clock }) => {
+    if (!group.current) return;
+    const show = THREE.MathUtils.smoothstep(past, 0.45, 0.85);
+    group.current.visible = show > 0.02;
+    group.current.scale.setScalar(0.6 + show * 0.7);
+    group.current.rotation.z = Math.sin(clock.elapsedTime * 0.35) * 0.08;
+    group.current.children.forEach((child, i) => {
+      const mesh = child as THREE.Mesh;
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      mat.opacity = show * (0.35 + (i % 2) * 0.25);
+    });
+  });
+
+  return (
+    <group ref={group} position={[0, 0.8, -2.2]}>
+      <mesh position={[-0.55, 0, 0]} rotation={[0, 0, 0.2]}>
+        <torusGeometry args={[0.55, 0.02, 8, 64]} />
+        <meshBasicMaterial color="#6F8FB7" transparent opacity={0.5} />
+      </mesh>
+      <mesh position={[0.55, 0, 0]} rotation={[0, 0, -0.2]}>
+        <torusGeometry args={[0.55, 0.02, 8, 64]} />
+        <meshBasicMaterial color="#C7A66A" transparent opacity={0.55} />
+      </mesh>
+    </group>
   );
 }
 
@@ -190,13 +254,12 @@ function Butterfly() {
     wingL.current.rotation.y = -0.75 + flap;
     wingR.current.rotation.y = 0.75 - flap;
 
-    // Approach from right, cross river, settle near bridge center.
     const x = THREE.MathUtils.lerp(3.6, 0.35, THREE.MathUtils.smoothstep(meet, 0, 0.72));
     const z = THREE.MathUtils.lerp(1.2, -1.0, THREE.MathUtils.smoothstep(meet, 0.1, 0.8));
     const y = 0.55 + Math.sin(t * 1.3) * 0.12 + Math.sin(meet * Math.PI) * 0.25;
     group.current.position.set(x + Math.sin(t * 0.6) * 0.08, y, z);
     group.current.rotation.y = -0.55 - meet * 0.35;
-    group.current.visible = reveal > 0.2;
+    group.current.visible = reveal > 0.2 && meet < 0.98;
     group.current.scale.setScalar(0.28 + reveal * 0.1);
   });
 
@@ -239,7 +302,7 @@ function Magpie() {
     if (!ref.current) return;
     const appear = THREE.MathUtils.smoothstep(meet, 0.22, 0.45);
     const t = clock.elapsedTime;
-    ref.current.visible = appear > 0.02;
+    ref.current.visible = appear > 0.02 && meet < 0.98;
     const x = THREE.MathUtils.lerp(-3.8, -0.25, THREE.MathUtils.smoothstep(meet, 0.22, 0.78));
     const z = THREE.MathUtils.lerp(0.9, -1.05, THREE.MathUtils.smoothstep(meet, 0.28, 0.82));
     ref.current.position.set(x + Math.sin(t * 0.5) * 0.08, 0.7 + Math.cos(t * 0.9) * 0.08, z);
@@ -265,11 +328,48 @@ function Magpie() {
   );
 }
 
+function Atmosphere() {
+  const fogRef = useRef<THREE.Fog>(null);
+  const past = useChapterLocal("past");
+  const present = useChapterLocal("present");
+  const sunRef = useRef<THREE.PointLight>(null);
+  const mythRef = useRef<THREE.PointLight>(null);
+
+  useFrame(() => {
+    if (fogRef.current) {
+      const c = new THREE.Color();
+      if (present > 0.05) {
+        c.set("#1a2438");
+      } else if (past > 0.05) {
+        c.setRGB(0.05 + past * 0.12, 0.02 + past * 0.04, 0.08 + past * 0.1);
+      } else {
+        c.set("#050810");
+      }
+      fogRef.current.color.copy(c);
+    }
+    if (mythRef.current) {
+      mythRef.current.intensity = THREE.MathUtils.smoothstep(past, 0.1, 0.7) * 1.6;
+    }
+    if (sunRef.current) {
+      sunRef.current.intensity = THREE.MathUtils.smoothstep(present, 0.1, 0.6) * 1.3;
+    }
+  });
+
+  return (
+    <>
+      <fog ref={fogRef} attach="fog" args={["#050810", 6, 16]} />
+      <pointLight ref={mythRef} position={[-2, 2.2, -3]} color="#9C493E" intensity={0} distance={14} />
+      <pointLight ref={sunRef} position={[3, 3, -2]} color="#C7A66A" intensity={0} distance={14} />
+    </>
+  );
+}
+
 function CameraRig() {
   const progress = useStoryStore((s) => s.progress);
   const reduced = useStoryStore((s) => s.reducedMotion);
   const reveal = useStoryStore((s) => s.worldReveal);
   const meet = useChapterLocal("meeting");
+  const past = useChapterLocal("past");
 
   useFrame(({ camera }) => {
     if (reduced) {
@@ -277,15 +377,15 @@ function CameraRig() {
       camera.lookAt(0, 0.2, -2);
       return;
     }
-    // Portal push-in, then journey, with a closer beat during meeting climax.
     const portalZ = THREE.MathUtils.lerp(8.5, 6.0, reveal);
     const journeyZ = portalZ - progress * 3.2;
     const meetPull = THREE.MathUtils.smoothstep(meet, 0.55, 0.95) * 1.1;
+    const mythLift = THREE.MathUtils.smoothstep(past, 0.2, 0.8) * 0.45;
     const z = journeyZ - meetPull;
-    const y = 0.95 - progress * 0.5 - meetPull * 0.15;
-    const x = Math.sin(progress * Math.PI * 2) * 0.28;
+    const y = 0.95 - progress * 0.5 - meetPull * 0.15 + mythLift;
+    const x = Math.sin(progress * Math.PI * 2) * 0.28 + past * 0.2;
     camera.position.lerp(new THREE.Vector3(x, y, z), 0.07);
-    camera.lookAt(0, 0.1 - progress * 0.15, -2.4);
+    camera.lookAt(0, 0.1 - progress * 0.15 + mythLift * 0.2, -2.4);
   });
 
   return null;
@@ -299,7 +399,7 @@ export function QDQCWorld() {
   return (
     <>
       <color attach="background" args={["#050810"]} />
-      <fog attach="fog" args={["#050810", 6, 16]} />
+      <Atmosphere />
       <ambientLight intensity={0.42} />
       <directionalLight position={[4, 6, 2]} intensity={0.85} color="#c9d7ef" />
       <pointLight position={[2.6, 2.4, -4]} intensity={1.4} color="#F7F3E9" distance={12} />
@@ -307,10 +407,13 @@ export function QDQCWorld() {
 
       <CameraRig />
       <Backdrop />
+      <PastPlate />
+      <PresentPlate />
       <BridgePlate />
       <EndingHint />
       <Moon />
       <Water />
+      <WindCloudInfinity />
       <BridgeLamps lit={lit} />
       <Butterfly />
       <Magpie />

@@ -8,11 +8,13 @@ function ChapterBlock({
   subtitle,
   lines,
   tone = "dark",
+  seal,
 }: {
   title: string;
   subtitle: string;
   lines: string[];
   tone?: "dark" | "light";
+  seal?: string;
 }) {
   const light = tone === "light";
   return (
@@ -25,6 +27,7 @@ function ChapterBlock({
             <p key={line}>{line}</p>
           ))}
         </div>
+        {seal ? <p className="chapter-seal">{seal}</p> : null}
       </div>
     </section>
   );
@@ -63,7 +66,6 @@ export function StoryChapters() {
         tone="light"
       />
 
-      {/* Phase 3: look first, read later */}
       <WatchBeat hint="看" />
       <WatchBeat hint="她渡河" />
       <WatchBeat hint="他从远方来" />
@@ -74,16 +76,32 @@ export function StoryChapters() {
         lines={chapters[3].copy}
       />
 
+      <WatchBeat hint="前世" />
+      <ChapterBlock
+        title="暮云"
+        subtitle="Past · 林暮云"
+        lines={["君为暮云我为风，", "生生世世不相离。"]}
+      />
+      <ChapterBlock
+        title="长风"
+        subtitle="Past · 木长风"
+        lines={["君为长风我为云，", "世世生生不相弃。"]}
+      />
       <ChapterBlock
         title={chapters[4].title}
         subtitle={chapters[4].subtitle}
-        lines={chapters[4].copy}
+        lines={["长风恋暮云，", "这是我们曾经的许诺。", "∞"]}
       />
+
+      <WatchBeat hint="人间" />
       <ChapterBlock
         title={chapters[5].title}
         subtitle={chapters[5].subtitle}
         lines={chapters[5].copy}
+        tone="light"
+        seal="老天安排的最大！"
       />
+
       <ChapterBlock
         title={chapters[6].title}
         subtitle={chapters[6].subtitle}

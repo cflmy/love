@@ -87,8 +87,8 @@ export const chapters: Chapter[] = [
     title: "前世",
     subtitle: "长风恋暮云",
     navLabel: "04 前世",
-    scrollSpan: 1.8,
-    themeTrack: "promise",
+    scrollSpan: 3.2,
+    themeTrack: "past",
     color: "#172B49",
     copy: [
       "林暮云 —— 木长风",

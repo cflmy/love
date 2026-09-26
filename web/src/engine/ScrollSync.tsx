@@ -19,6 +19,9 @@ function trackForChapter(id: string, local: number): TrackId | null {
   if (id === "meeting") {
     return local < 0.55 ? "butterfly" : "magpieBridge";
   }
+  if (id === "past") {
+    return local < 0.45 ? "past" : "promise";
+  }
   return chapter.themeTrack;
 }
 
