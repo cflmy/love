@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Float, useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { images } from "@/data/assets";
+import { crops } from "@/data/assets";
 import { chapterProgressBounds } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
 
@@ -20,7 +20,7 @@ function useChapterLocal(id: string) {
 }
 
 function Backdrop() {
-  const texture = useTexture(images.heroDesktop);
+  const texture = useTexture(crops.heroDesktop);
   texture.colorSpace = THREE.SRGBColorSpace;
   const progress = useStoryStore((s) => s.progress);
   const reveal = useStoryStore((s) => s.worldReveal);
@@ -37,7 +37,7 @@ function Backdrop() {
 }
 
 function PastPlate() {
-  const texture = useTexture(images.storyBoardB);
+  const texture = useTexture(crops.pastMuyun);
   texture.colorSpace = THREE.SRGBColorSpace;
   const past = useChapterLocal("past");
   const reveal = useStoryStore((s) => s.worldReveal);
@@ -52,7 +52,7 @@ function PastPlate() {
 }
 
 function PresentPlate() {
-  const texture = useTexture(images.presentFive);
+  const texture = useTexture(crops.lifeMeet);
   texture.colorSpace = THREE.SRGBColorSpace;
   const present = useChapterLocal("present");
   const reveal = useStoryStore((s) => s.worldReveal);
@@ -67,7 +67,7 @@ function PresentPlate() {
 }
 
 function BridgePlate() {
-  const texture = useTexture(images.bridgeSheet);
+  const texture = useTexture(crops.bridgeFull);
   texture.colorSpace = THREE.SRGBColorSpace;
   const meet = useChapterLocal("meeting");
   const reveal = useStoryStore((s) => s.worldReveal);
@@ -82,7 +82,7 @@ function BridgePlate() {
 }
 
 function EndingHint() {
-  const texture = useTexture(images.endingHero);
+  const texture = useTexture(crops.heroEnding);
   texture.colorSpace = THREE.SRGBColorSpace;
   const progress = useStoryStore((s) => s.progress);
   const opacity = THREE.MathUtils.smoothstep(progress, 0.82, 0.98);
@@ -329,7 +329,7 @@ function Magpie() {
 }
 
 function JourneyPlate() {
-  const texture = useTexture(images.storyBoardC);
+  const texture = useTexture(crops.roadBeforeSunset);
   texture.colorSpace = THREE.SRGBColorSpace;
   const journey = useChapterLocal("journey");
   const reveal = useStoryStore((s) => s.worldReveal);

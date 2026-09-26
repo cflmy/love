@@ -1,12 +1,23 @@
 "use client";
 
 import { chapters, STORY_SCROLL_VH } from "@/data/chapters";
-import { useStoryStore } from "@/store/story";
+import {
+  journeyLeadIn,
+  journeyOutro,
+  meetingScenes,
+  pastScenes,
+  prayerScenes,
+  presentScenes,
+  responseScenes,
+  storyStrip,
+} from "@/data/scenes";
 import { JourneyChapter } from "./JourneyChapter";
 import { MemoriesTimeline } from "./MemoriesTimeline";
 import { QuietDaysChapter } from "./QuietDaysChapter";
 import { LetterChapter } from "./LetterChapter";
 import { EndingChapter } from "./EndingChapter";
+import { SceneBeatView, StoryFilmStrip } from "./SceneBeat";
+import { useStoryStore } from "@/store/story";
 
 function ChapterBlock({
   title,
@@ -38,14 +49,6 @@ function ChapterBlock({
   );
 }
 
-function WatchBeat({ hint }: { hint: string }) {
-  return (
-    <section className="chapter-watch">
-      <p className="chapter-watch__hint">{hint}</p>
-    </section>
-  );
-}
-
 export function StoryChapters() {
   const entered = useStoryStore((s) => s.entered);
   if (!entered) {
@@ -59,11 +62,19 @@ export function StoryChapters() {
         subtitle="A quieter, brighter tomorrow."
         lines={["Que dure", "que câlin", "愿天长地久", "愿紧紧相拥"]}
       />
+
+      {prayerScenes.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} />
+      ))}
       <ChapterBlock
         title={chapters[1].title}
         subtitle={chapters[1].subtitle}
         lines={chapters[1].copy}
       />
+
+      {responseScenes.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} tone="light" />
+      ))}
       <ChapterBlock
         title={chapters[2].title}
         subtitle={chapters[2].subtitle}
@@ -71,34 +82,28 @@ export function StoryChapters() {
         tone="light"
       />
 
-      <WatchBeat hint="看" />
-      <WatchBeat hint="她渡河" />
-      <WatchBeat hint="他从远方来" />
-      <WatchBeat hint="桥灯亮起" />
+      <StoryFilmStrip images={storyStrip} label="故事长卷" />
+      {meetingScenes.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} />
+      ))}
       <ChapterBlock
         title={chapters[3].title}
         subtitle={chapters[3].subtitle}
         lines={chapters[3].copy}
       />
 
-      <WatchBeat hint="前世" />
-      <ChapterBlock
-        title="暮云"
-        subtitle="Past · 林暮云"
-        lines={["君为暮云我为风，", "生生世世不相离。"]}
-      />
-      <ChapterBlock
-        title="长风"
-        subtitle="Past · 木长风"
-        lines={["君为长风我为云，", "世世生生不相弃。"]}
-      />
+      {pastScenes.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} />
+      ))}
       <ChapterBlock
         title={chapters[4].title}
         subtitle={chapters[4].subtitle}
         lines={["长风恋暮云，", "这是我们曾经的许诺。", "∞"]}
       />
 
-      <WatchBeat hint="人间" />
+      {presentScenes.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} tone="light" />
+      ))}
       <ChapterBlock
         title={chapters[5].title}
         subtitle={chapters[5].subtitle}
@@ -107,11 +112,13 @@ export function StoryChapters() {
         seal="老天安排的最大！"
       />
 
-      {/* Phase 6 climax — long scroll runway */}
-      <WatchBeat hint="山高路远" />
+      {journeyLeadIn.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} />
+      ))}
       <JourneyChapter />
-      <WatchBeat hint="奔赴" />
-      <WatchBeat hint="相拥" />
+      {journeyOutro.map((beat) => (
+        <SceneBeatView key={beat.id} beat={beat} />
+      ))}
       <ChapterBlock
         title={chapters[6].title}
         subtitle={chapters[6].subtitle}

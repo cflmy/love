@@ -13,23 +13,43 @@ gsap.registerPlugin(ScrollTrigger);
 
 type TrackId = keyof typeof audio;
 
+/** Map scroll beats across all 17 OST tracks. */
 function trackForChapter(id: string, local: number): TrackId | null {
   const chapter = chapters.find((c) => c.id === id);
   if (!chapter?.themeTrack) return null;
-  if (id === "meeting") {
-    return local < 0.55 ? "butterfly" : "magpieBridge";
+
+  switch (id) {
+    case "opening":
+      return "prologue";
+    case "prayer":
+      return "prayer";
+    case "response":
+      return "response";
+    case "meeting":
+      return local < 0.48 ? "butterfly" : "magpieBridge";
+    case "past":
+      if (local < 0.32) return "past";
+      if (local < 0.66) return "changfeng";
+      return "promise";
+    case "present":
+      return "present";
+    case "journey":
+      if (local < 0.16) return "journey";
+      if (local < 0.34) return "dontHurry";
+      if (local < 0.52) return "mountains";
+      if (local < 0.72) return "towardYou";
+      return "sunNeverSets";
+    case "memories":
+      return local < 0.55 ? "quietDays" : "reprise";
+    case "quiet-days":
+      return "quietDays";
+    case "letter":
+      return local < 0.45 ? "reprise" : "sunNeverSets";
+    case "future":
+      return "moreDays";
+    default:
+      return chapter.themeTrack;
   }
-  if (id === "past") {
-    return local < 0.45 ? "past" : "promise";
-  }
-  if (id === "journey") {
-    if (local < 0.26) return "journey";
-    if (local < 0.46) return "dontHurry";
-    if (local < 0.68) return "mountains";
-    if (local < 0.9) return "towardYou";
-    return "sunNeverSets";
-  }
-  return chapter.themeTrack;
 }
 
 export function ScrollSync({ children }: { children: React.ReactNode }) {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { images } from "@/data/assets";
+import { crops } from "@/data/assets";
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore, type OpeningPhase } from "@/store/story";
 
@@ -98,7 +98,7 @@ export function OpeningGate() {
             <div className="nfc-card__inner">
               <div className="nfc-face nfc-face--front">
                 <Image
-                  src={images.nfcCard}
+                  src={crops.nfcFront}
                   alt="QDQC card front"
                   fill
                   priority
@@ -108,7 +108,7 @@ export function OpeningGate() {
               </div>
               <div className="nfc-face nfc-face--back">
                 <Image
-                  src={images.nfcCard}
+                  src={crops.nfcBack}
                   alt="QDQC card back"
                   fill
                   priority

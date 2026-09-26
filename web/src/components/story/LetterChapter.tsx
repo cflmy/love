@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { crops } from "@/data/assets";
 
 /** Minimal letter page embedded in the scroll — paper, not WebGL. */
 export function LetterChapter() {
@@ -8,6 +10,16 @@ export function LetterChapter() {
 
   return (
     <section className="letter-chapter" aria-label="给你的一封信">
+      <div className="letter-chapter__still">
+        <Image
+          src={crops.storyLetter}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 90vw, 520px"
+          className="letter-chapter__img"
+        />
+      </div>
+
       <button
         type="button"
         className={`letter-envelope ${open ? "is-open" : ""}`}

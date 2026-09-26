@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { images } from "@/data/assets";
+import { crops } from "@/data/assets";
 import { MusicEngine } from "@/engine/MusicEngine";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -77,7 +77,7 @@ export function CardExperience({ initialFace = "front" }: { initialFace?: "front
             <div className="nfc-card__inner">
               <div className="nfc-face nfc-face--front">
                 <Image
-                  src={images.nfcCard}
+                  src={crops.nfcFront}
                   alt="QDQC front"
                   fill
                   priority
@@ -87,7 +87,7 @@ export function CardExperience({ initialFace = "front" }: { initialFace?: "front
               </div>
               <div className="nfc-face nfc-face--back">
                 <Image
-                  src={images.nfcCard}
+                  src={crops.nfcBack}
                   alt="QDQC back"
                   fill
                   priority

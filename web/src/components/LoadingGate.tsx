@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { images } from "@/data/assets";
+import { crops } from "@/data/assets";
 import { useStoryStore } from "@/store/story";
 
 export function LoadingGate({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,7 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    const urls = [images.nfcCard, images.heroDesktop, images.endingHero];
+    const urls = [crops.nfcFront, crops.heroDesktop, crops.heroEnding, crops.meetBridge];
     Promise.all(
       urls.map(
         (src) =>

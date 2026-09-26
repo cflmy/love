@@ -1,9 +1,21 @@
 "use client";
 
+import Image from "next/image";
+import { crops } from "@/data/assets";
+
 /** Breathing chapter after climax — almost no spectacle. */
 export function QuietDaysChapter() {
   return (
     <section className="quiet-days" aria-label="Quiet Days">
+      <div className="quiet-days__photo" aria-hidden>
+        <Image
+          src={crops.storyQuietTea}
+          alt=""
+          fill
+          sizes="100vw"
+          className="quiet-days__img"
+        />
+      </div>
       <div className="quiet-days__window" aria-hidden>
         <div className="quiet-days__sunshaft" />
         <div className="quiet-days__dust" />

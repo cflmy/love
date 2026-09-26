@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "sync:assets": "node scripts/sync-assets.mjs",
+    "crop:assets": "node scripts/crop-assets.mjs",
     "predev": "npm run sync:assets",
     "dev": "next dev",
     "prebuild": "npm run sync:assets",

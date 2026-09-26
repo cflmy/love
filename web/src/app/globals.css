@@ -261,16 +261,9 @@ body {
   object-fit: cover !important;
 }
 
-.nfc-face__img--front {
-  object-position: 12% center !important;
-  transform: scale(1.85);
-  transform-origin: left center;
-}
-
+.nfc-face__img--front,
 .nfc-face__img--back {
-  object-position: 88% center !important;
-  transform: scale(1.85);
-  transform-origin: right center;
+  object-position: center !important;
 }
 
 .opening-butterfly {
@@ -567,6 +560,142 @@ body {
   background: color-mix(in oklab, var(--moon-white) 35%, transparent);
 }
 
+/* —— Scene beats (cropped stills between acts) —— */
+.scene-beat {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: 1.5rem;
+  padding: 8vh 1.25rem;
+}
+
+.scene-beat__frame {
+  display: grid;
+  gap: 0.65rem;
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.scene-beat--full .scene-beat__frame {
+  grid-template-columns: 1fr;
+  min-height: min(62vh, 520px);
+}
+
+.scene-beat--pair .scene-beat__frame,
+.scene-beat--split .scene-beat__frame {
+  grid-template-columns: 1fr 1fr;
+  min-height: min(48vh, 400px);
+}
+
+.scene-beat--triptych .scene-beat__frame {
+  grid-template-columns: repeat(3, 1fr);
+  min-height: min(42vh, 340px);
+}
+
+.scene-beat--grid .scene-beat__frame {
+  grid-template-columns: 1fr 1fr;
+  min-height: min(56vh, 460px);
+}
+
+.scene-beat__shot {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  min-height: 180px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.scene-beat--full .scene-beat__shot {
+  min-height: min(62vh, 520px);
+}
+
+.scene-beat__img {
+  object-fit: cover;
+}
+
+.scene-beat__copy {
+  text-align: center;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.scene-beat__caption {
+  margin: 0;
+  font-family: var(--font-serif-chinese), serif;
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  letter-spacing: 0.08em;
+  color: var(--moon-white);
+}
+
+.scene-beat--light .scene-beat__caption {
+  color: var(--dai-qing);
+}
+
+.scene-beat__line {
+  margin: 0.65rem 0 0;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  opacity: 0.72;
+  color: color-mix(in oklab, var(--pale-gold) 85%, white);
+}
+
+.scene-beat--light .scene-beat__line {
+  color: color-mix(in oklab, var(--cinnabar) 70%, var(--dai-qing));
+}
+
+.story-strip {
+  padding: 6vh 0 4vh;
+  overflow: hidden;
+}
+
+.story-strip__label {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  color: var(--pale-gold);
+}
+
+.story-strip__rail {
+  display: flex;
+  gap: 0.55rem;
+  width: max-content;
+  padding: 0 1.25rem;
+  animation: story-strip-drift 48s linear infinite;
+}
+
+.story-strip__cell {
+  position: relative;
+  width: 120px;
+  height: 180px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  border: 1px solid color-mix(in oklab, var(--pale-gold) 25%, transparent);
+}
+
+.story-strip__cell span {
+  position: absolute;
+  left: 0.4rem;
+  bottom: 0.35rem;
+  font-family: var(--font-serif-display), serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--moon-white);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes story-strip-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 .era-flash {
   pointer-events: none;
   position: fixed;
@@ -591,12 +720,25 @@ body {
   place-items: center;
 }
 
+.journey-chapter__photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.journey-chapter__img {
+  object-fit: cover;
+  opacity: 0.5;
+  filter: saturate(0.85) brightness(0.7);
+}
+
 .journey-chapter__sky {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background:
-    radial-gradient(ellipse at 50% 78%, rgba(232, 164, 90, 0.45), transparent 42%),
-    linear-gradient(180deg, #1a1020 0%, #3a1d18 48%, #172b49 100%);
+    radial-gradient(ellipse at 50% 78%, rgba(232, 164, 90, 0.35), transparent 42%),
+    linear-gradient(180deg, rgba(26, 16, 32, 0.55) 0%, rgba(58, 29, 24, 0.4) 48%, rgba(23, 43, 73, 0.5) 100%);
   pointer-events: none;
 }
 
@@ -620,6 +762,22 @@ body {
   overflow: hidden;
   opacity: 0.72;
   transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.journey-pane__photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.journey-pane__img {
+  object-fit: cover;
+  opacity: 0.45;
+}
+
+.journey-pane > *:not(.journey-pane__photo):not(.journey-path) {
+  position: relative;
+  z-index: 1;
 }
 
 .journey-pane.is-focus {
@@ -809,6 +967,16 @@ body {
 }
 
 @media (max-width: 720px) {
+  .scene-beat--pair .scene-beat__frame,
+  .scene-beat--split .scene-beat__frame,
+  .scene-beat--grid .scene-beat__frame {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .scene-beat--triptych .scene-beat__frame {
+    grid-template-columns: 1fr;
+  }
+
   .journey-split {
     grid-template-columns: 1fr;
   }
@@ -934,12 +1102,16 @@ body {
 }
 
 .memory-card__photo {
+  position: relative;
   height: 140px;
   border-radius: 0.5rem;
-  background-size: cover;
-  background-position: center;
   margin-bottom: 0.75rem;
-  opacity: 0.9;
+  overflow: hidden;
+  opacity: 0.95;
+}
+
+.memory-card__img {
+  object-fit: cover;
 }
 
 .memory-card__date {
@@ -961,11 +1133,7 @@ body {
 }
 
 .memories-bridge__note {
-  margin: 3rem 0 0;
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.45;
-  letter-spacing: 0.08em;
+  display: none;
 }
 
 .quiet-days {
@@ -975,6 +1143,19 @@ body {
   place-items: center;
   background: linear-gradient(180deg, #f7f3e9 0%, #efe6d4 55%, #e7dcc6 100%);
   color: var(--dai-qing);
+  overflow: hidden;
+}
+
+.quiet-days__photo {
+  position: absolute;
+  inset: 8% 12%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  opacity: 0.55;
+}
+
+.quiet-days__img {
+  object-fit: cover;
 }
 
 .quiet-days__window {
@@ -1079,6 +1260,7 @@ body {
 }
 
 .letter-chapter {
+  position: relative;
   min-height: 120svh;
   display: grid;
   place-items: center;
@@ -1086,6 +1268,19 @@ body {
   padding: 8vh 1.5rem;
   background: #f3ecdf;
   color: var(--dai-qing);
+}
+
+.letter-chapter__still {
+  position: relative;
+  width: min(420px, 88vw);
+  aspect-ratio: 5 / 3;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(23, 43, 73, 0.14);
+}
+
+.letter-chapter__img {
+  object-fit: cover;
 }
 
 .letter-envelope {
@@ -1156,14 +1351,49 @@ body {
 }
 
 .ending-chapter {
-  min-height: 120svh;
+  position: relative;
+  min-height: 140svh;
   display: grid;
   place-content: center;
   justify-items: center;
   gap: 1rem;
   padding: 10vh 1.5rem;
-  text-align: center;
+  overflow: hidden;
+  color: var(--moon-white);
   background: radial-gradient(ellipse at center, #172b49 0%, #050810 70%);
+}
+
+.ending-chapter__hero {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.ending-chapter__img {
+  object-fit: cover;
+  opacity: 0.45;
+  filter: brightness(0.65);
+}
+
+.ending-chapter__still {
+  position: relative;
+  z-index: 1;
+  width: min(360px, 80vw);
+  aspect-ratio: 5 / 3;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+.ending-chapter__coda-img {
+  object-fit: cover;
+}
+
+.ending-chapter > *:not(.ending-chapter__hero) {
+  position: relative;
+  z-index: 1;
+  text-align: center;
 }
 
 .ending-chapter__eyebrow {
@@ -1266,7 +1496,8 @@ body {
   .opening-gate__portal,
   .journey-chain span,
   .journey-sun__disk,
-  .quiet-days__sunshaft {
+  .quiet-days__sunshaft,
+  .story-strip__rail {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

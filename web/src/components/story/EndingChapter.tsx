@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { crops } from "@/data/assets";
 
 /** Ending coda — never THE END. */
 export function EndingChapter() {
@@ -8,6 +10,26 @@ export function EndingChapter() {
 
   return (
     <section className="ending-chapter" aria-label="更远的明天">
+      <div className="ending-chapter__hero" aria-hidden>
+        <Image
+          src={crops.heroEnding}
+          alt=""
+          fill
+          sizes="100vw"
+          className="ending-chapter__img"
+          priority={false}
+        />
+      </div>
+      <div className="ending-chapter__still">
+        <Image
+          src={crops.storyCoda}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 90vw, 480px"
+          className="ending-chapter__coda-img"
+        />
+      </div>
+
       <p className="ending-chapter__eyebrow">To Be Continued…</p>
       <h2>与你，共赴更长的明天</h2>
       <p className="ending-chapter__more">More Days Together</p>

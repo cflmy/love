@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
+import { crops } from "@/data/assets";
 import { chapterProgressBounds } from "@/data/chapters";
 import { useStoryStore } from "@/store/story";
 
@@ -25,6 +27,17 @@ function opacityIn(local: number, start: number, end: number) {
   return Math.min(1, (local - start) / 0.06);
 }
 
+function pickBg(local: number) {
+  if (local < 0.18) return crops.roadWait;
+  if (local < 0.32) return crops.roadDepart;
+  if (local < 0.46) return crops.roadClimb;
+  if (local < 0.58) return crops.roadRunHer;
+  if (local < 0.7) return crops.mythChains;
+  if (local < 0.82) return crops.mythRun;
+  if (local < 0.92) return crops.roadEmbrace;
+  return crops.mythNeverSets;
+}
+
 /** Full-screen journey climax: split paths → chain break → embrace → hush. */
 export function JourneyChapter() {
   const local = useJourneyLocal();
@@ -35,6 +48,7 @@ export function JourneyChapter() {
   const embrace = opacityIn(local, 0.88, 0.98);
   const hush = local >= 0.93;
   const visible = local > 0.02 && local < 0.995;
+  const bg = pickBg(local);
 
   return (
     <section
@@ -43,12 +57,18 @@ export function JourneyChapter() {
       style={{ opacity: visible ? 1 : 0.35 }}
     >
       <div className="journey-chapter__sticky">
+        <div className="journey-chapter__photo" aria-hidden>
+          <Image src={bg} alt="" fill priority sizes="100vw" className="journey-chapter__img" />
+        </div>
         <div className="journey-chapter__sky" style={{ opacity: Math.min(1, local * 1.2) }} />
 
         <div className="journey-split" style={{ opacity: split }}>
           <div
             className={`journey-pane journey-pane--him ${beatActive(local, 0.12, 0.4) ? "is-focus" : ""}`}
           >
+            <div className="journey-pane__photo">
+              <Image src={crops.roadDepart} alt="" fill sizes="50vw" className="journey-pane__img" />
+            </div>
             <p className="journey-pane__role">他</p>
             <p className="journey-pane__line">你别担心</p>
             <p className="journey-pane__line strong">太阳落山前我一定回来</p>
@@ -57,6 +77,9 @@ export function JourneyChapter() {
           <div
             className={`journey-pane journey-pane--her ${beatActive(local, 0.28, 0.55) ? "is-focus" : ""}`}
           >
+            <div className="journey-pane__photo">
+              <Image src={crops.roadRunHer} alt="" fill sizes="50vw" className="journey-pane__img" />
+            </div>
             <p className="journey-pane__role">她</p>
             <p className="journey-pane__line">不必着急</p>
             <p className="journey-pane__line strong">只要你回来，太阳永不落山</p>

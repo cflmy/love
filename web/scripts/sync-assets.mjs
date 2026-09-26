@@ -6,6 +6,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { spawnSync } from "child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
@@ -63,3 +64,8 @@ for (const [srcName, destName] of MUSIC_MAP) {
 }
 
 console.log("\nAsset sync complete (sources untouched).");
+
+const crop = spawnSync("node", [path.join(__dirname, "crop-assets.mjs")], {
+  stdio: "inherit",
+});
+if (crop.status !== 0) process.exit(crop.status || 1);
