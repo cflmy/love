@@ -14,8 +14,7 @@ export type GalleryTile = {
     | "day"
     | "road"
     | "myth"
-    | "past"
-    | "poster";
+    | "past";
 };
 
 /**
@@ -84,6 +83,5 @@ export const MEMORY_WATERFALL: GalleryTile[] = [
   { id: "past-meet", src: crops.pastMeet, caption: "同游", mark: 8, series: "past" },
   { id: "past-seas", src: crops.pastSeas, caption: "山海", mark: 8, series: "past" },
   { id: "road-9", src: crops.roadMoreDays, caption: "日后与君", mark: 8, series: "road" },
-  { id: "poster-her", src: crops.posterHer, caption: "她", mark: 8, series: "poster" },
-  { id: "poster-him", src: crops.posterHim, caption: "他", mark: 8, series: "poster" },
+  // poster-her / poster-him omitted — cream studio plates flash white in the dark film
 ];

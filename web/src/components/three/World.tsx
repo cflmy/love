@@ -20,6 +20,7 @@ import {
   journeyPlateOpacity,
   journeyPlateT,
 } from "@/data/journeyShots";
+import { FUTURE_STILLS, futurePlateOpacity, futurePlateT } from "@/data/codaShots";
 import { useStoryStore } from "@/store/story";
 import { CinematicPanel, DoorPanel, ScrollPanPlate } from "./ScrollPanPlate";
 
@@ -381,7 +382,6 @@ function Add1Backdrop() {
   const memories = useChapterLocal("memories");
   const quiet = useChapterLocal("quiet-days");
   const letter = useChapterLocal("letter");
-  const future = useChapterLocal("future");
   const reveal = useStoryStore((s) => s.worldReveal);
 
   const warm = journey > 0.88 || memories > 0.001;
@@ -389,12 +389,14 @@ function Add1Backdrop() {
 
   const inMemories =
     THREE.MathUtils.smoothstep(memories, 0.05, 0.14) * leaveBand(memories, 0.9, 0.98);
-  const inCoda =
-    THREE.MathUtils.smoothstep(Math.max(quiet, letter, future), 0.02, 0.12) *
-    leaveBand(future, 0.88, 0.98) *
-    0.55;
+  // Quiet Days keeps the desk. Letter lets the paper take the frame. Tomorrow has its own plates.
+  const inQuiet =
+    THREE.MathUtils.smoothstep(quiet, 0.02, 0.1) * leaveBand(quiet, 0.9, 0.985);
+  const letterFade =
+    THREE.MathUtils.smoothstep(letter, 0.02, 0.1) * leaveBand(letter, 0.18, 0.42);
 
-  const opacity = reveal * (inMemories * 0.56 + inCoda * 0.3);
+  // Keep desk warm under Quiet Days teacup — no black void behind the still
+  const opacity = reveal * (inMemories * 0.56 + inQuiet * 0.62 + letterFade * 0.22);
   // Soft breath only — stay in the left-top desk / daisy core
   const progress = THREE.MathUtils.clamp(memories * 0.55, 0, 1);
 
@@ -509,23 +511,77 @@ function JourneyRealm() {
   );
 }
 
+/**
+ * Act 17 · 更远的明天 — bridge, then two figures, then a slow wide.
+ * Preloads late in the letter so the return does not suspend the canvas.
+ */
+function FutureRealm() {
+  const letter = useChapterLocal("letter");
+  const future = useChapterLocal("future");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const reduced = useStoryStore((s) => s.reducedMotion);
+
+  const gate =
+    reveal *
+    THREE.MathUtils.smoothstep(future, 0.012, 0.06) *
+    leaveBand(future, 0.96, 1);
+
+  const warm = letter > 0.7 || future > 0.001;
+  if (!warm) return null;
+
+  const fade = reduced ? 0.035 : 0.055;
+
+  return (
+    <group position={[0, 0.02, 0]}>
+      {FUTURE_STILLS.map((still, i) => {
+        const op = gate * futurePlateOpacity(future, still.start, still.end, fade);
+        const t = futurePlateT(future, still.start, still.end);
+        const damp = (still.damp ?? 2.2) * (reduced ? 1.5 : 1) + i * 0.02;
+        return (
+          <ScrollPanPlate
+            key={still.id}
+            url={still.url}
+            progress={t}
+            z={still.z}
+            y={still.y ?? 0}
+            opacity={op}
+            cover={still.cover ?? 1.14}
+            reveal={still.reveal}
+            damp={damp}
+            color="#fff6ea"
+          />
+        );
+      })}
+    </group>
+  );
+}
+
 function Atmosphere() {
   const fogRef = useRef<THREE.FogExp2>(null);
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
   const present = useChapterLocal("present");
   const journey = useChapterLocal("journey");
+  const quiet = useChapterLocal("quiet-days");
+  const letter = useChapterLocal("letter");
+  const future = useChapterLocal("future");
 
   useFrame(() => {
     if (!fogRef.current) return;
     const c = fogRef.current.color;
-    if (journey > 0.05) {
+    if (future > 0.02) {
+      const dusk = THREE.MathUtils.smoothstep(future, 0.72, 1);
+      c.setRGB(0.1 + (1 - dusk) * 0.08, 0.08 + (1 - dusk) * 0.05, 0.12 + (1 - dusk) * 0.02);
+    } else if (letter > 0.02 || quiet > 0.02) {
+      c.set("#1c1610");
+    } else if (journey > 0.05) {
       if (journey > 0.9) c.set("#12182a");
       else c.setRGB(0.1 + journey * 0.08, 0.04 + journey * 0.03, 0.03);
     } else if (present > 0.02) c.setRGB(0.12 + present * 0.06, 0.1 + present * 0.04, 0.14 + present * 0.05);
     else if (past > 0.05) c.setRGB(0.08 + past * 0.08, 0.04 + past * 0.03, 0.1 + past * 0.06);
     else c.set("#050810");
-    fogRef.current.density = 0.032 + meet * 0.008 + past * 0.006;
+    const coda = Math.max(quiet, letter, future);
+    fogRef.current.density = 0.032 + meet * 0.008 + past * 0.006 - coda * 0.01;
   });
 
   return <fogExp2 ref={fogRef} attach="fog" args={["#050810", 0.04]} />;
@@ -539,6 +595,10 @@ function CameraRig() {
   const past = useChapterLocal("past");
   const present = useChapterLocal("present");
   const journey = useChapterLocal("journey");
+  const memories = useChapterLocal("memories");
+  const quiet = useChapterLocal("quiet-days");
+  const letter = useChapterLocal("letter");
+  const future = useChapterLocal("future");
   const camPos = useMemo(() => new THREE.Vector3(0, 0.95, 8.2), []);
   const look = useMemo(() => new THREE.Vector3(0, 0.1, -2.2), []);
   const lookTarget = useMemo(() => new THREE.Vector3(), []);
@@ -548,7 +608,17 @@ function CameraRig() {
     const portalZ = THREE.MathUtils.lerp(8.8, 6.4, reveal);
     const portrait = size.height > size.width;
     const presentNear = shotSmooth(present, 0.02, 0.35);
-    const fovTarget = portrait ? 50 - presentNear * 2 : 40 - presentNear * 1.5;
+    const coda =
+      memories > 0.001 || quiet > 0.001 || letter > 0.001 || future > 0.001;
+    const letterClose = shotSmooth(letter, 0.08, 0.55);
+    const futureWide = shotSmooth(future, 0.28, 0.92);
+    const fovTarget = coda
+      ? portrait
+        ? 46 - letterClose * 3 + futureWide * 4
+        : 36 - letterClose * 2 + futureWide * 6
+      : portrait
+        ? 50 - presentNear * 2
+        : 40 - presentNear * 1.5;
     const persp = camera as THREE.PerspectiveCamera;
     if ("fov" in persp && Math.abs(persp.fov - fovTarget) > 0.05) {
       persp.fov = THREE.MathUtils.damp(persp.fov, fovTarget, 2, dt);
@@ -583,24 +653,36 @@ function CameraRig() {
     const climaxPush = shotSmooth(journey, 0.7, 0.92) * 1.1;
     const hushPull = journey > 0.92 ? (journey - 0.92) * 2.2 : 0;
 
-    posTarget.set(
-      meetX + mythOrbit + presentDrift + Math.sin(journey * Math.PI) * 0.28,
-      meetY + mythLift - presentPush * 0.1 + climaxPush * 0.08 - progress * 0.06,
-      meetZ - mythDolly - presentPush - climaxPush + hushPull,
-    );
-    lookTarget.set(
-      meet * 0.06 * amp + mythOrbit * 0.2 + presentDrift * 0.35,
-      -0.02 - bridgePush * 0.12 + mythLift * 0.15 - presentPush * 0.04,
-      -2.3 - bridgePush * 0.55 - mythDolly * 0.2 - presentPush * 0.15,
-    );
+    if (coda) {
+      // Hold the hush, lean in for the letter, then pull back through tomorrow.
+      const futureRise = shotSmooth(future, 0.32, 0.9) * 0.4 * amp;
+      posTarget.set(
+        Math.sin(future * Math.PI) * 0.1 * amp,
+        0.36 + futureRise,
+        5.05 - letterClose * 0.85 * amp + futureWide * 2.7 * amp,
+      );
+      lookTarget.set(0, -0.04 + futureRise * 0.2, -2.55);
+    } else {
+      posTarget.set(
+        meetX + mythOrbit + presentDrift + Math.sin(journey * Math.PI) * 0.28,
+        meetY + mythLift - presentPush * 0.1 + climaxPush * 0.08 - progress * 0.06,
+        meetZ - mythDolly - presentPush - climaxPush + hushPull,
+      );
+      lookTarget.set(
+        meet * 0.06 * amp + mythOrbit * 0.2 + presentDrift * 0.35,
+        -0.02 - bridgePush * 0.12 + mythLift * 0.15 - presentPush * 0.04,
+        -2.3 - bridgePush * 0.55 - mythDolly * 0.2 - presentPush * 0.15,
+      );
+    }
 
-    dampToward(camPos, posTarget, reduced ? 4.2 : 2.4, dt);
-    dampToward(look, lookTarget, reduced ? 4.8 : 3.0, dt);
+    const codaDamp = coda ? (reduced ? 2.2 : 1.35) : reduced ? 4.2 : 2.4;
+    dampToward(camPos, posTarget, codaDamp, dt);
+    dampToward(look, lookTarget, coda ? codaDamp + 0.4 : reduced ? 4.8 : 3.0, dt);
     camera.position.copy(camPos);
     camera.lookAt(look);
     camera.rotation.z = THREE.MathUtils.damp(
       camera.rotation.z,
-      reduced
+      reduced || coda
         ? 0
         : Math.sin(meet * Math.PI) * 0.02 +
             Math.sin(past * Math.PI * 2) * 0.012 +
@@ -616,8 +698,10 @@ function CameraRig() {
 export function QDQCWorld() {
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
+  const future = useChapterLocal("future");
   const lit = shotSmooth(meet, MEETING_SHOTS.bridge.start, MEETING_SHOTS.meeting.end);
   const mythGlow = THREE.MathUtils.smoothstep(past, 0.1, 0.5);
+  const closingGlow = THREE.MathUtils.smoothstep(future, 0.62, 0.92);
 
   return (
     <>
@@ -634,6 +718,13 @@ export function QDQCWorld() {
         distance={14}
         decay={2}
       />
+      <pointLight
+        position={[0.1, 0.35, -3.2]}
+        intensity={closingGlow * 0.85}
+        color="#C7A66A"
+        distance={9}
+        decay={2}
+      />
 
       <CameraRig />
 
@@ -647,6 +738,7 @@ export function QDQCWorld() {
         <ChapterUnderlays />
         <PresentRealm />
         <JourneyRealm />
+        <FutureRealm />
         <Add1Backdrop />
       </Suspense>
     </>

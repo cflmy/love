@@ -122,7 +122,8 @@ export const chapters: Chapter[] = [
     title: "Quiet Days",
     subtitle: "Quiet cuddles.",
     navLabel: "06 Quiet Days",
-    scrollSpan: 2.4,
+    /** One teacup dwell + three quiet lines */
+    scrollSpan: 3.2,
     themeTrack: "quietDays",
     color: "#F7F3E9",
     copy: ["Quiet days.", "Quiet cuddles.", "陪伴的日子安宁，坚定的拥抱无声。"],
@@ -133,10 +134,11 @@ export const chapters: Chapter[] = [
     title: "给你的一封信",
     subtitle: "A Letter",
     navLabel: "07 信件",
-    scrollSpan: 2.0,
+    /** Envelope dwell, then one line at a time */
+    scrollSpan: 3.8,
     themeTrack: "reprise",
     color: "#F7F3E9",
-    copy: ["致我最想拥抱的人", "愿天长地久，愿紧紧相拥。"],
+    copy: ["致我最想拥抱的人", "最后我想告诉你，我爱你。"],
   },
   {
     id: "future",
@@ -144,7 +146,8 @@ export const chapters: Chapter[] = [
     title: "更远的明天",
     subtitle: "More Days Together",
     navLabel: "08 明天",
-    scrollSpan: 2.6,
+    /** Bridge return → two figures → pull-back → held last line */
+    scrollSpan: 5.8,
     themeTrack: "moreDays",
     color: "#0A1128",
     copy: ["与你，共赴更长的明天。", "More Days Together", "相逢鹊渡，相守情长。"],

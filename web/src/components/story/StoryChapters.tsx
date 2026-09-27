@@ -62,32 +62,10 @@ export function StoryChapters() {
         <MemoriesTimeline />
       </section>
 
-      <section
-        className="story-act story-act--coda"
-        data-act="quiet-days"
-        aria-label="Quiet Days"
-        style={{ minHeight: quietH }}
-      >
-        <QuietDaysChapter />
-      </section>
+      <QuietDaysChapter />
 
-      <section
-        className="story-act story-act--coda"
-        data-act="letter"
-        aria-label="给你的一封信"
-        style={{ minHeight: letterH }}
-      >
-        <LetterChapter />
-      </section>
-
-      <section
-        className="story-act story-act--coda"
-        data-act="future"
-        aria-label="更远的明天"
-        style={{ minHeight: futureH }}
-      >
-        <EndingChapter />
-      </section>
+      <LetterChapter />
+      <EndingChapter />
     </div>
   );
 }

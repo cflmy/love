@@ -1,10 +1,9 @@
 "use client";
 
 import { useRef, type ButtonHTMLAttributes, type CSSProperties, type MouseEvent } from "react";
-import { uiButtons } from "@/data/assets";
 import { BlossomMark, StoryIcon, type StoryIconName } from "./icons";
 
-/** Same names as the kit so call sites stay stable. Silhouette from supplied art. */
+/** Same names as the kit so call sites stay stable. */
 export type ArtButtonVariant =
   | "start"
   | "next"
@@ -30,18 +29,6 @@ const TONE: Record<ArtButtonVariant, Tone> = {
   pause: "pause",
 };
 
-const ART: Record<ArtButtonVariant, string> = {
-  start: uiButtons.start,
-  next: uiButtons.next,
-  prev: uiButtons.prev,
-  more: uiButtons.more,
-  music: uiButtons.music,
-  pause: uiButtons.pause,
-  memory: uiButtons.memory,
-  primaryMobile: uiButtons.primaryMobile,
-  secondaryMobile: uiButtons.secondaryMobile,
-};
-
 const LEADING: Partial<Record<Tone, StoryIconName>> = {
   music: "music",
   pause: "pause",
@@ -58,7 +45,8 @@ type Props = {
 } & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "className">;
 
 /**
- * Story CTA: kit silhouette + layered washes (004 parchment / night glass), not a flat pill.
+ * Story CTA — glass pill + blossom mark.
+ * Kit bitmaps bake in 「了解更多」etc.; we never paint them under custom labels.
  */
 export function ArtButton({
   variant = "start",
@@ -73,7 +61,6 @@ export function ArtButton({
   const ref = useRef<HTMLButtonElement>(null);
   const tone = TONE[variant];
   const leading = LEADING[tone];
-  const art = ART[variant];
 
   const onMove = (e: MouseEvent<HTMLButtonElement>) => {
     const el = ref.current;
@@ -98,7 +85,6 @@ export function ArtButton({
 
   const style = {
     "--btn-w": `${width}px`,
-    "--btn-art": `url(${art})`,
   } as CSSProperties;
 
   return (
@@ -115,7 +101,6 @@ export function ArtButton({
       {...rest}
     >
       <span className="qd-btn__wash" aria-hidden />
-      <span className="qd-btn__art" aria-hidden />
       <span className="qd-btn__sheen" aria-hidden />
       <span className="qd-btn__rim" aria-hidden />
       {tone === "primary" || tone === "memory" || tone === "prev" ? (

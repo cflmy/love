@@ -104,9 +104,9 @@ export function MemoriesTimeline() {
   const [paused, setPaused] = useState(false);
   const [colCount, setColCount] = useState(3);
   /** Extra repeats until each stack ≥ stage height */
-  const [copies, setCopies] = useState(3);
+  const [copies, setCopies] = useState(4);
   const stageRef = useRef<HTMLDivElement>(null);
-  const measureStackRef = useRef<HTMLDivElement>(null);
+  const stackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 720px)");
@@ -121,25 +121,36 @@ export function MemoriesTimeline() {
     [colCount, copies],
   );
 
-  // Grow copies until one stack fills the stage (fixes tall empty gutters)
+  // Grow copies until EVERY column fills the stage (images load async → observe stacks)
   useLayoutEffect(() => {
     if (reduced) return;
     const stage = stageRef.current;
-    const stack = measureStackRef.current;
-    if (!stage || !stack) return;
+    if (!stage) return;
 
     const ensureFill = () => {
       const stageH = stage.clientHeight;
-      const stackH = stack.scrollHeight;
-      if (stageH < 80 || stackH < 40) return;
-      if (stackH < stageH * 1.08) {
-        setCopies((c) => Math.min(c + 1, 8));
+      if (stageH < 80) return;
+      const stacks = stackRefs.current.filter(Boolean) as HTMLDivElement[];
+      if (stacks.length === 0) return;
+      const shortest = Math.min(...stacks.map((s) => s.scrollHeight));
+      if (shortest < 40) return;
+      // Need headroom so staggered columns never flash empty gutters mid-loop
+      if (shortest < stageH * 1.45) {
+        setCopies((c) => Math.min(c + 1, 12));
       }
     };
 
     ensureFill();
     const ro = new ResizeObserver(ensureFill);
     ro.observe(stage);
+    stackRefs.current.forEach((el) => {
+      if (el) ro.observe(el);
+    });
+    // Images settle after decode
+    const imgs = stage.querySelectorAll("img");
+    imgs.forEach((img) => {
+      if (!img.complete) img.addEventListener("load", ensureFill, { once: true });
+    });
     return () => ro.disconnect();
   }, [columns, reduced, colCount]);
 
@@ -183,7 +194,13 @@ export function MemoriesTimeline() {
               {[0, 1].map((copy) => (
                 <div
                   key={copy}
-                  ref={ci === 0 && copy === 0 ? measureStackRef : undefined}
+                  ref={
+                    copy === 0
+                      ? (el) => {
+                          stackRefs.current[ci] = el;
+                        }
+                      : undefined
+                  }
                   className="qd-marquee__stack"
                   aria-hidden={copy === 1}
                 >

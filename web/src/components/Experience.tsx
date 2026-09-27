@@ -16,7 +16,7 @@ export function Experience() {
     <Suspense fallback={null}>
       <BootProvider>
         <LoadingGate>
-          <main className="relative min-h-svh overflow-x-hidden bg-[#050810] text-[#F7F3E9]">
+          <main className="relative min-h-svh overflow-x-clip bg-[#050810] text-[#F7F3E9]">
             <WorldCanvas />
             <OpeningGate />
             <ScrollSync>
