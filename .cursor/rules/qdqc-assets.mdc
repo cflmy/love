@@ -8,40 +8,53 @@ alwaysApply: false
 
 ## Source of truth
 
-- Raw sheets: `assert/image/*.png` (never edit / never delete).
-- Manual slices: `assert/zip/*.zip` (Photoshop Save-for-Web cuts; never delete).
-- App consumes copies under `web/public/` only.
+- Raw archive: `assert/image/*.png`, `assert/zip/*.zip`, `assert/music/` — **read-only**, never edit / delete.
+- **Permanent app assets** (committed): `web/public/media/{slices,parts,crops,image}` and `web/public/audio/`.
 - Registry: `web/src/data/assets.ts` maps id → path → chapter → role.
+- Policy: `web/ASSETS.md`.
 
-## Pipeline (`npm run sync:assets`)
+## Sync (`npm run sync:assets`)
 
-1. Copy `assert/image` → `web/public/media/image` and music → `audio/`.
-2. `crop-assets.mjs` — only NFC / posters / heroes **without** zip (`003`–`007`, `011`).
-3. `process-zip-assets.py` — extract `assert/zip` → `media/slices/`, chroma-key cream/dark UI sheets, connectivity / column-split multi-component rows → `media/parts/`, rewrite matching `media/crops/*.webp` aliases.
+Only copies raw sheets + music from `assert/` → `public/media/image` and `public/audio` when newer.
+**Never** regenerates or overwrites polished `slices/` / `parts/` / `crops/`.
+Do **not** reintroduce batch image-processing scripts.
 
-Manual cuts may leave fringe: prefer transparent `parts/` sprites; for scene panels, slight CSS scale / soft mask is OK. Do not re-introduce fractional crops of multi-panel sheets.
+## Polished layout
+
+| Path | Contents |
+| --- | --- |
+| `media/slices/{id}/` | Per-tile zip cuts (logos keyed; scene boards edge-trimmed) |
+| `media/parts/` | Transparent subjects, flight frames, UI buttons (connectivity) |
+| `media/crops/` | Chapter still aliases + NFC / poster / hero |
+| `media/image/` | Full source sheets (reference) |
 
 ## Image map
 
 | Source | Role |
 | --- | --- |
-| `001`–`002` zip | Logo / brand mark tiles |
-| `003`–`006` sheets | NFC card + character posters (crop script) |
-| `007` `011` sheets | Desktop / ending heroes (crop script) |
-| `008` zip | Butterfly hero + poses + flight / elements |
-| `009` zip | Magpie hero + poses + flight / elements |
-| `010` zip | Magpie bridge + day variants + icons |
-| `012`–`18` zip | Storyboard / chapter panels |
-| `19`–`22` zip | UI kit (desktop + mobile) |
+| `001`–`002` zip | Logo / brand mark tiles → `slices/` + `brand.*` |
+| `003`–`006` sheets | NFC card + posters → `crops/` |
+| `007` `011` sheets | Desktop / ending heroes → `crops/` |
+| `008` zip | Butterfly hero + poses + flight / elements → `parts/` |
+| `009` zip | Magpie hero + poses + flight / elements → `parts/` |
+| `010` zip | Magpie bridge + day variants + icons → `parts/` / `slices/` |
+| `012`–`18` zip | Storyboard / chapter panels → `crops/` / `slices/` |
+| `19`–`22` zip | UI kit → `parts/ui-btn-*`, `uiChrome.*` |
 
-Prefer `crops.*` and `parts.*` over full sheets in UI / R3F.
+Prefer `crops.*`, `parts.*`, `uiButtons.*` over full sheets in UI / R3F.
 
 ## Framing (respect intrinsic size)
 
 - Do **not** force art into fixed aspect boxes with `object-fit: contain` + dark letterbox bars.
 - Prefer `FrameImage` / `width:100%; height:auto` so each file keeps its own ratio.
 - Use `cover` only for intentional atmospheric full-bleed (e.g. journey sticky plate).
-- Buttons: extract via **chroma-key + connected components** (`extract-ui-buttons.py`), never straight-edge fractional crops of the button silhouette.
+- Buttons: use committed `uiButtons` (background removed + connected components). Never CSS pills for story CTAs. Never straight-edge fractional crops of button silhouettes.
+
+## When editing a single asset
+
+1. Start from the matching file in `assert/zip` (or `assert/image` for NFC/poster).
+2. Remove cream/white manual-cut fringe; for grouped UI, key navy then keep the connected component (incl. petals).
+3. Overwrite the file under `public/media/...`; update `assets.ts` / `imageSize.ts` if paths or sizes change.
 
 ## Music map → chapters
 
@@ -55,4 +68,4 @@ Prefer `crops.*` and `parts.*` over full sheets in UI / R3F.
 | `ACT V・山高路远` + `12`–`14` | Journey climax |
 | `ACT VI 15` + `16` `17` | Return / Reprise / Ending |
 
-Copy as `.m4a` into `web/public/audio/`; decode via Howler.
+Committed as `.m4a` under `web/public/audio/`; decode via Howler.

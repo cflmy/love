@@ -1,15 +1,11 @@
-#!/usr/bin/env node
 /**
- * Read-only sync: assert/ → web/public/
- * Never mutates docs/ or assert/.
- * 1) copy full image sheets + music
- * 2) crop NFC/poster/hero (no zip)
- * 3) process assert/zip manual slices → slices/ parts/ crop aliases
+ * Optional read-only sync of raw sheets + music from assert/ → public/.
+ * Never touches polished slices/parts/crops — those are permanent committed assets.
+ * Never mutates assert/ or docs/.
  */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { spawnSync } from "child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "../..");
@@ -41,25 +37,27 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-function copyFile(src, dest) {
+function copyIfNewer(src, dest) {
   ensureDir(path.dirname(dest));
+  if (fs.existsSync(dest)) {
+    const s = fs.statSync(src);
+    const d = fs.statSync(dest);
+    if (d.size === s.size && d.mtimeMs >= s.mtimeMs) return false;
+  }
   fs.copyFileSync(src, dest);
   console.log("✓", path.relative(ROOT, dest));
-}
-
-function run(cmd, args, opts = {}) {
-  const result = spawnSync(cmd, args, { stdio: "inherit", ...opts });
-  if (result.status !== 0) process.exit(result.status || 1);
+  return true;
 }
 
 ensureDir(OUT_IMG);
 ensureDir(OUT_AUD);
 
+let n = 0;
 const images = fs
   .readdirSync(path.join(ASSERT, "image"))
   .filter((f) => f.endsWith(".png"));
 for (const file of images) {
-  copyFile(path.join(ASSERT, "image", file), path.join(OUT_IMG, file));
+  if (copyIfNewer(path.join(ASSERT, "image", file), path.join(OUT_IMG, file))) n++;
 }
 
 for (const [srcName, destName] of MUSIC_MAP) {
@@ -68,16 +66,11 @@ for (const [srcName, destName] of MUSIC_MAP) {
     console.warn("⚠ missing music:", srcName);
     continue;
   }
-  copyFile(src, path.join(OUT_AUD, destName));
+  if (copyIfNewer(src, path.join(OUT_AUD, destName))) n++;
 }
 
-console.log("\nAsset sync complete (sources untouched).");
-
-run("node", [path.join(__dirname, "crop-assets.mjs")]);
-
-const venvPy = "/tmp/qdqc-venv/bin/python";
-const sysPy = "python3";
-const py = fs.existsSync(venvPy) ? venvPy : sysPy;
-run(py, [path.join(__dirname, "process-zip-assets.py")]);
-run(py, [path.join(__dirname, "extract-ui-buttons.py")]);
-run(py, [path.join(__dirname, "write-image-size.py")]);
+console.log(
+  n
+    ? `\nSynced ${n} raw sheet/audio file(s). Polished media/slices|parts|crops untouched.`
+    : "\nRaw sheets/audio already up to date. Polished media untouched.",
+);

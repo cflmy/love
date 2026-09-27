@@ -9,8 +9,32 @@ export const palette = {
   deepNight: "#050810",
 } as const;
 
+/**
+ * Bump when rewriting public/media binaries in place.
+ * Same path + new bytes is invisible to next/image & browser caches without this.
+ */
+export const MEDIA_REV = "20260927i";
+
+/** Cache-bust polished media URLs (path stays under public/). */
+export function media(path: string): string {
+  if (!path.startsWith("/media/")) return path;
+  return `${path}?v=${MEDIA_REV}`;
+}
+
+function mediaMap<T extends Record<string, string>>(obj: T): { [K in keyof T]: string } {
+  const out = {} as { [K in keyof T]: string };
+  for (const key of Object.keys(obj) as (keyof T)[]) {
+    out[key] = media(obj[key]);
+  }
+  return out;
+}
+
+function mediaList(paths: readonly string[]): string[] {
+  return paths.map(media);
+}
+
 /** Full sheets (synced from assert) — prefer `crops` for UI. */
-export const images = {
+export const images = mediaMap({
   logoFemale: "/media/image/001.png",
   logoBrand: "/media/image/002.png",
   nfcCard: "/media/image/003.png",
@@ -33,10 +57,10 @@ export const images = {
   uiKit: "/media/image/20.png",
   uiExtra: "/media/image/21.png",
   uiMobile: "/media/image/22.png",
-} as const;
+});
 
-/** Cropped / sliced stills. Zip slices rewrite most entries; NFC/poster/hero from crop-assets. */
-export const crops = {
+/** Cropped / sliced stills — permanent files under public/media/crops. */
+export const crops = mediaMap({
   nfcFront: "/media/crops/nfc-front.webp",
   nfcBack: "/media/crops/nfc-back.webp",
   portraitHer: "/media/crops/portrait-her-card.webp",
@@ -111,42 +135,52 @@ export const crops = {
   storyQuietTea: "/media/crops/story-quiet-tea.webp",
   storyLetter: "/media/crops/story-letter.webp",
   storyCoda: "/media/crops/story-coda.webp",
-} as const;
+});
 
-/** Flight / element frames from zip connectivity / column splits (transparent). */
+/** Transparent subjects / flight / elements — permanent under public/media/parts. */
 export const parts = {
-  butterflyFlight: [
+  butterflyFlight: mediaList([
     "/media/parts/butterfly-flight-01.webp",
     "/media/parts/butterfly-flight-02.webp",
     "/media/parts/butterfly-flight-03.webp",
     "/media/parts/butterfly-flight-04.webp",
     "/media/parts/butterfly-flight-05.webp",
-  ],
-  magpieFlight: [
+  ]),
+  magpieFlight: mediaList([
     "/media/parts/magpie-flight-01.webp",
     "/media/parts/magpie-flight-02.webp",
     "/media/parts/magpie-flight-03.webp",
     "/media/parts/magpie-flight-04.webp",
     "/media/parts/magpie-flight-05.webp",
     "/media/parts/magpie-flight-06.webp",
-  ],
-  butterflyFront: "/media/parts/butterfly-front.webp",
-  butterflySide: "/media/parts/butterfly-side.webp",
-  butterflyBack: "/media/parts/butterfly-back.webp",
-  magpieSpread: "/media/parts/magpie-pose-01.webp",
-  magpieSide: "/media/parts/magpie-pose-02.webp",
-  magpiePerch: "/media/parts/magpie-pose-03.webp",
-  magpieBack: "/media/parts/magpie-pose-04.webp",
-  butterflyElements: Array.from(
-    { length: 14 },
-    (_, i) => `/media/parts/butterfly-element-${String(i + 1).padStart(2, "0")}.webp`,
+  ]),
+  butterflyFront: media("/media/parts/butterfly-front.webp"),
+  butterflySide: media("/media/parts/butterfly-side.webp"),
+  butterflyBack: media("/media/parts/butterfly-back.webp"),
+  magpieSpread: media("/media/parts/magpie-pose-01.webp"),
+  magpieSide: media("/media/parts/magpie-pose-02.webp"),
+  magpiePerch: media("/media/parts/magpie-pose-03.webp"),
+  magpieBack: media("/media/parts/magpie-pose-04.webp"),
+  butterflyElements: mediaList(
+    Array.from(
+      { length: 21 },
+      (_, i) => `/media/parts/butterfly-element-${String(i + 1).padStart(2, "0")}.webp`,
+    ),
   ),
-  magpieElements: Array.from(
-    { length: 14 },
-    (_, i) => `/media/parts/magpie-element-${String(i + 1).padStart(2, "0")}.webp`,
+  magpieElements: mediaList(
+    Array.from(
+      { length: 23 },
+      (_, i) => `/media/parts/magpie-element-${String(i + 1).padStart(2, "0")}.webp`,
+    ),
+  ),
+  magpieElementsB: mediaList(
+    Array.from(
+      { length: 23 },
+      (_, i) => `/media/parts/magpie-element-b-${String(i + 1).padStart(2, "0")}.webp`,
+    ),
   ),
   /** Decorative floaters — butterflies + petals from element sheets */
-  floaters: [
+  floaters: mediaList([
     "/media/parts/butterfly-element-01.webp",
     "/media/parts/butterfly-element-02.webp",
     "/media/parts/butterfly-element-04.webp",
@@ -154,11 +188,11 @@ export const parts = {
     "/media/parts/butterfly-element-09.webp",
     "/media/parts/magpie-element-01.webp",
     "/media/parts/magpie-element-03.webp",
-  ],
-} as const;
+  ]),
+};
 
-/** UI kit buttons extracted from sheets 19 / 22 — use as world CTAs, not CSS pills. */
-export const uiButtons = {
+/** UI kit — connectivity-extracted buttons / chrome (not CSS pills). */
+export const uiButtons = mediaMap({
   start: "/media/parts/ui-btn-start.webp",
   next: "/media/parts/ui-btn-next.webp",
   prev: "/media/parts/ui-btn-prev.webp",
@@ -168,10 +202,21 @@ export const uiButtons = {
   memory: "/media/parts/ui-btn-memory.webp",
   primaryMobile: "/media/parts/ui-btn-primary-mobile.webp",
   secondaryMobile: "/media/parts/ui-btn-secondary-mobile.webp",
-} as const;
+});
+
+export const uiChrome = {
+  navBar: media("/media/parts/ui-nav-bar.webp"),
+  dialog: media("/media/parts/ui-dialog.webp"),
+  mobileParts: mediaList(
+    Array.from(
+      { length: 8 },
+      (_, i) => `/media/parts/ui-mobile-part-${String(i + 1).padStart(2, "0")}.webp`,
+    ),
+  ),
+};
 
 /** Brand marks from assert/zip 001–002 (manual slices). */
-export const brand = {
+export const brand = mediaMap({
   /** Portrait logo tile — loading / nav mark */
   icon: "/media/slices/001/001_06.webp",
   portrait: "/media/slices/001/001_01.webp",
@@ -179,17 +224,20 @@ export const brand = {
   hero: "/media/slices/002/002_01.webp",
   wordmark: "/media/slices/002/002_05.webp",
   seal: "/media/slices/002/002_12.webp",
-} as const;
+});
 
-/** Extra bridge / atmosphere tiles not aliased into crops. */
-export const worldArt = {
+/** Extra bridge / atmosphere — prefer keyed parts when available. */
+export const worldArt = mediaMap({
   bridgeHero: "/media/slices/010/010_01.webp",
   bridgeBanner: "/media/slices/010/010_02.webp",
-  bridgeDetail: "/media/slices/010/010_08.webp",
+  bridgeDetail: "/media/parts/bridge-row-01.webp",
   bridgeStrip: "/media/slices/010/010_23.webp",
+  bridgeSnow: "/media/parts/bridge-snow-tile.webp",
+  bridgeMorning: "/media/parts/bridge-morning-tile.webp",
+  bridgeDusk: "/media/parts/bridge-dusk-tile.webp",
   butterflyDetail: "/media/slices/008/008_09.webp",
   magpieSheet: "/media/slices/009/009_02.webp",
-} as const;
+});
 
 /** Manual zip slice roots (full tile sets). Prefer `crops` / `parts` in UI. */
 export const slices = {

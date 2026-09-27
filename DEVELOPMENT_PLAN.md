@@ -53,7 +53,7 @@ web/
 │   ├── data/           # chapters, assets, timeline, ost
 │   ├── store/          # Zustand：progress, chapter, audioUnlock
 │   └── styles/
-└── scripts/            # sync-assets.mjs（只读复制 assert → public）
+└── scripts/            # sync-assets.mjs（仅同步整板图+音乐；精修素材永久提交）
 ```
 
 ### 关键技术决定
@@ -82,7 +82,7 @@ web/
 | 14 / 15 | 今世记忆章节板 |
 | 19–22 | Desktop / Mobile UI Kit、组件规范 |
 
-实施策略：优先使用 `assert/zip/` 手动切图（经 `process-zip-assets.py` 导出到 `web/public/media/slices` / `parts`，并回写 `crops` 别名）。无 zip 的 NFC/海报/Hero 仍用 `crop-assets.mjs`。`assert/` 源文件只读、不删。手动切边瑕疵：透明层 chroma-key + 连通域/列切；场景板用轻微 CSS scale 遮盖接缝。
+实施策略：`assert/zip/` 手动切图已逐张精修并永久保存在 `web/public/media/slices` / `parts` / `crops`（见 `web/ASSETS.md`）。白边用 defringe 清除；成组按钮扣背景后按联通域提取。`assert/` 只读。禁止再用批量脚本覆盖精修结果。NFC/海报/Hero 亦已写入 `crops/`。
 
 ### 3.2 音乐 `assert/music/`（实为 AAC/M4A）
 

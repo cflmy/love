@@ -27,7 +27,6 @@
 # debug
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
@@ -40,6 +39,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Derived from ../assert via `npm run sync:assets` — do not edit
-/public/media/
-/public/audio/
+# public/media and public/audio are the permanent site assets — commit them.
+# Do NOT ignore polished slices / parts / crops / audio.

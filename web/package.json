@@ -4,11 +4,7 @@
   "private": true,
   "scripts": {
     "sync:assets": "node scripts/sync-assets.mjs",
-    "crop:assets": "node scripts/crop-assets.mjs",
-    "process:zip": "node -e \"const{spawnSync:s}=require('child_process');const p=require('fs').existsSync('/tmp/qdqc-venv/bin/python')?'/tmp/qdqc-venv/bin/python':'python3';process.exit(s(p,['scripts/process-zip-assets.py'],{stdio:'inherit'}).status||0)\"",
-    "predev": "npm run sync:assets",
     "dev": "next dev",
-    "prebuild": "npm run sync:assets",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
