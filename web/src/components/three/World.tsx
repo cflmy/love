@@ -1,11 +1,20 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { crops } from "@/data/assets";
 import { chapterProgressBounds } from "@/data/chapters";
-import { MEETING_SHOTS, smoothstep as shotSmooth } from "@/data/meetingShots";
+import {
+  MEETING_PAST_HANDOFF,
+  MEETING_SHOTS,
+  smoothstep as shotSmooth,
+} from "@/data/meetingShots";
+import {
+  PRESENT_STILLS,
+  presentPlateOpacity,
+  presentPlateT,
+} from "@/data/presentShots";
 import { useStoryStore } from "@/store/story";
 import { CinematicPanel, DoorPanel, ScrollPanPlate } from "./ScrollPanPlate";
 
@@ -44,10 +53,12 @@ function NightSky() {
   const reveal = useStoryStore((s) => s.worldReveal);
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
-  // Hand off quickly so 暮云 owns early past
+  const { bridgeHoldUntil, bridgeGoneBy } = MEETING_PAST_HANDOFF;
+  // Hold under title until closed 前世 doors cover — no pure-black gap
   const leave =
-    leaveBand(meet, 0.94, 1) * (1 - THREE.MathUtils.smoothstep(past, 0, 0.08));
-  const opacity = reveal * leave * (0.42 + meet * 0.18);
+    leaveBand(meet, bridgeHoldUntil, bridgeGoneBy) *
+    (1 - THREE.MathUtils.smoothstep(past, 0.02, 0.14));
+  const opacity = reveal * leave * (0.58 + meet * 0.28);
 
   return (
     <ScrollPanPlate
@@ -76,9 +87,10 @@ function MeetingPlate() {
   const reduced = useStoryStore((s) => s.reducedMotion);
   const target = useMemo(() => new THREE.Vector3(), []);
 
-  // Exit during meeting coda + first breath of past — don't sit on 暮云
-  const leaveMeet = leaveBand(meet, 0.93, 1);
-  const leavePast = 1 - THREE.MathUtils.smoothstep(past, 0, 0.07);
+  // Hold bridge under title; dissolve into closed past doors (no void, no fly-away mess)
+  const { bridgeHoldUntil, bridgeGoneBy } = MEETING_PAST_HANDOFF;
+  const leaveMeet = leaveBand(meet, bridgeHoldUntil, bridgeGoneBy);
+  const leavePast = 1 - THREE.MathUtils.smoothstep(past, 0.02, 0.14);
   const gate = reveal * leaveMeet * leavePast;
 
   const sheSettle = band(meet, MEETING_SHOTS.butterfly.start - 0.02, MEETING_SHOTS.crossing.start + 0.04);
@@ -90,8 +102,9 @@ function MeetingPlate() {
   const heOp = gate * heSettle * leaveBand(meet, MEETING_SHOTS.bridge.start, MEETING_SHOTS.bridge.start + 0.12);
 
   const bridgeSettle = band(meet, MEETING_SHOTS.bridge.start - 0.02, MEETING_SHOTS.meeting.start);
-  const bridgeExit = band(meet, 0.92, 0.98);
-  const bridgeOp = gate * bridgeSettle * (1 - bridgeExit * 0.85);
+  // Soft dissolve only — avoid chaotic upward “curtain” exit into 前世
+  const bridgeExit = band(meet, bridgeHoldUntil, bridgeGoneBy) * 0.28;
+  const bridgeOp = gate * bridgeSettle * leaveBand(meet, bridgeHoldUntil, bridgeGoneBy);
 
   useFrame((_, dt) => {
     if (!group.current) return;
@@ -138,8 +151,9 @@ function MeetingPlate() {
           exit={bridgeExit}
           from={{ x: 0, y: -1.9, z: 1.1, rotZ: 0, scale: 0.68 }}
           home={{ x: 0, y: 0.48, z: 0, rotZ: 0, scale: 1 }}
-          away={{ x: 0, y: 1.4, z: -1.2, rotZ: 0, scale: 0.86 }}
-          damp={reduced ? 5.5 : 3.1}
+          // Soft recess, not a rising curtain into black
+          away={{ x: 0, y: 0.55, z: -0.45, rotZ: 0, scale: 0.94 }}
+          damp={reduced ? 5.5 : 2.6}
         />
       ) : null}
       {/* Broken keyed cutouts (butterfly/magpie parts) removed — jagged fringing. */}
@@ -149,128 +163,135 @@ function MeetingPlate() {
 
 /**
  * Act 02 · 前世
- * - Far 双开门 backdrop: 暮云 left | 长风 right — recessed, unstretched, for 纵深
- * - Front animation: fitGrow 暮云→长风 heroes + myth cards (must stay readable)
+ * Closed door curtains warm under 相逢 title → then open → heroes → myth cards.
+ * Preloads in late meeting so Suspense never flashes a black void.
  */
 function PastRealm() {
+  const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
   const present = useChapterLocal("present");
   const reveal = useStoryStore((s) => s.worldReveal);
   const reduced = useStoryStore((s) => s.reducedMotion);
+  const H = MEETING_PAST_HANDOFF;
 
-  const enter = THREE.MathUtils.smoothstep(past, 0, 0.05);
-  const leavePresent = 1 - THREE.MathUtils.smoothstep(present, 0, 0.14);
-  const gate = reveal * enter * leavePresent * leaveBand(past, 0.96, 1);
+  const preload = meet > H.preloadFrom || past > 0.001;
+  if (!preload) return null;
 
-  if (gate < 0.02) return null;
+  // Closed curtains under title, then past owns the frame
+  const doorWarm = shotSmooth(meet, H.doorWarmStart, H.doorWarmEnd);
+  const pastEnter = THREE.MathUtils.smoothstep(past, 0, 0.08);
+  const leavePresent = 1 - THREE.MathUtils.smoothstep(present, 0, 0.06);
+  const gate =
+    reveal *
+    Math.max(doorWarm, pastEnter) *
+    leavePresent *
+    leaveBand(past, 0.96, 1);
 
   const amp = reduced ? 0.45 : 1;
 
-  // Doors soft but large enough to kill black void; still under front plates
-  const doorOp = gate * 0.62;
-  const doorOpen = THREE.MathUtils.smoothstep(past, 0.05, 0.7) * (reduced ? 0.4 : 1);
+  // Open only after past owns the frame — closed curtains kill the void first
+  const doorOpen =
+    THREE.MathUtils.smoothstep(past, H.doorOpenStart, H.doorOpenEnd) * (reduced ? 0.35 : 1);
+  // Nearly opaque when closed; soften as they open behind heroes
+  const doorOp = gate * THREE.MathUtils.lerp(0.94, 0.48, doorOpen);
 
-  // Hero animation layer — front of doors
-  const muyunOp = gate * band(past, 0.02, 0.12) * leaveBand(past, 0.3, 0.38) * 0.92;
-  const changfengOp = gate * band(past, 0.28, 0.38) * leaveBand(past, 0.48, 0.56) * 0.9;
-  const muyunT = THREE.MathUtils.clamp((past - 0.02) / 0.32, 0, 1);
-  const changfengT = THREE.MathUtils.clamp((past - 0.28) / 0.26, 0, 1);
+  // Heroes wait for curtains — no messy overlap with door art
+  const heroGate = gate * THREE.MathUtils.smoothstep(past, H.heroStart - 0.02, H.heroStart + 0.06);
+  const muyunOp = heroGate * band(past, H.heroStart, H.heroStart + 0.1) * leaveBand(past, 0.34, 0.42) * 0.94;
+  const changfengOp = heroGate * band(past, 0.32, 0.42) * leaveBand(past, 0.5, 0.58) * 0.92;
+  const muyunT = THREE.MathUtils.clamp((past - H.heroStart) / 0.3, 0, 1);
+  const changfengT = THREE.MathUtils.clamp((past - 0.32) / 0.26, 0, 1);
 
   /** Vertical stills — 初遇 / 同游 / 相守 / 山海 float in depth */
   const cards = [
     {
       url: crops.pastTravel,
-      settle: band(past, 0.5, 0.6),
-      exit: band(past, 0.68, 0.76),
-      op: band(past, 0.5, 0.58) * leaveBand(past, 0.7, 0.78),
-      from: { x: -1.8 * amp, y: -0.8, z: 0.9, rotZ: 0.08, scale: 0.75 },
+      settle: band(past, 0.52, 0.62),
+      exit: band(past, 0.7, 0.78),
+      op: band(past, 0.52, 0.6) * leaveBand(past, 0.72, 0.8),
+      from: { x: -1.8 * amp, y: -0.55, z: 0.9, rotZ: 0.06, scale: 0.78 },
       home: { x: -0.95, y: 0.05, z: 0.2, rotZ: -0.03, scale: 1 },
-      away: { x: -2.2 * amp, y: 1.1, z: -0.4, rotZ: -0.1, scale: 0.85 },
+      away: { x: -2.0 * amp, y: 0.85, z: -0.35, rotZ: -0.08, scale: 0.88 },
       height: 2.1,
     },
     {
       url: crops.pastMeet,
-      settle: band(past, 0.58, 0.68),
-      exit: band(past, 0.76, 0.84),
-      op: band(past, 0.58, 0.66) * leaveBand(past, 0.78, 0.86),
-      from: { x: 1.9 * amp, y: -0.6, z: 1.0, rotZ: -0.08, scale: 0.74 },
+      settle: band(past, 0.6, 0.7),
+      exit: band(past, 0.78, 0.86),
+      op: band(past, 0.6, 0.68) * leaveBand(past, 0.8, 0.88),
+      from: { x: 1.8 * amp, y: -0.45, z: 1.0, rotZ: -0.06, scale: 0.78 },
       home: { x: 0.95, y: 0.1, z: 0.15, rotZ: 0.03, scale: 1 },
-      away: { x: 2.3 * amp, y: 1.0, z: -0.35, rotZ: 0.1, scale: 0.85 },
+      away: { x: 2.1 * amp, y: 0.8, z: -0.3, rotZ: 0.08, scale: 0.88 },
       height: 2.0,
     },
     {
       url: crops.pastHold,
-      settle: band(past, 0.7, 0.8),
-      exit: band(past, 0.86, 0.93),
-      op: band(past, 0.7, 0.78) * leaveBand(past, 0.88, 0.95),
-      from: { x: 0, y: -1.4, z: 1.2, rotZ: 0, scale: 0.7 },
-      home: { x: -0.35, y: 0.2, z: 0.35, rotZ: -0.02, scale: 1 },
-      away: { x: -0.8, y: 1.3, z: -0.5, rotZ: 0.05, scale: 0.88 },
+      settle: band(past, 0.72, 0.82),
+      exit: band(past, 0.88, 0.94),
+      op: band(past, 0.72, 0.8) * leaveBand(past, 0.9, 0.96),
+      from: { x: 0, y: -1.1, z: 1.15, rotZ: 0, scale: 0.74 },
+      home: { x: -0.3, y: 0.18, z: 0.35, rotZ: -0.02, scale: 1 },
+      away: { x: -0.7, y: 1.05, z: -0.4, rotZ: 0.04, scale: 0.9 },
       height: 2.15,
     },
     {
       url: crops.pastSeas,
-      settle: band(past, 0.8, 0.9),
+      settle: band(past, 0.82, 0.92),
       exit: 0,
-      op: band(past, 0.8, 0.9) * leaveBand(past, 0.96, 1),
-      from: { x: 0.4, y: -1.6, z: 1.0, rotZ: 0.04, scale: 0.68 },
-      home: { x: 0.4, y: 0.15, z: 0.25, rotZ: 0.02, scale: 1 },
-      away: { x: 0.4, y: 0.15, z: 0.25, rotZ: 0.02, scale: 1 },
+      op: band(past, 0.82, 0.92) * leaveBand(past, 0.96, 1),
+      from: { x: 0.35, y: -1.2, z: 1.0, rotZ: 0.03, scale: 0.72 },
+      home: { x: 0.35, y: 0.12, z: 0.25, rotZ: 0.02, scale: 1 },
+      away: { x: 0.35, y: 0.12, z: 0.25, rotZ: 0.02, scale: 1 },
       height: 2.05,
     },
   ] as const;
 
   return (
     <group position={[0, 0.05, -2.8]}>
-      {/* Far 双开门 — recessed L|R, never stretch, never cover heroes */}
+      {/* Far 双开门 — closed first to cover void, then gentle open */}
       <DoorPanel
         url={crops.pastMuyun}
         side="left"
-        progress={past}
+        progress={Math.max(past, doorWarm * 0.08)}
         opacity={doorOp}
         z={-12.5}
         open={doorOpen}
-        damp={reduced ? 4 : 2.2}
+        damp={reduced ? 4 : 2.0}
       />
       <DoorPanel
         url={crops.pastChangfeng}
         side="right"
-        progress={past}
+        progress={Math.max(past, doorWarm * 0.08)}
         opacity={doorOp}
         z={-12.2}
         open={doorOpen}
-        damp={reduced ? 4 : 2.3}
+        damp={reduced ? 4 : 2.1}
       />
 
-      {/* Animation heroes — closer z, full readability */}
-      {muyunOp > 0.02 ? (
-        <ScrollPanPlate
-          url={crops.pastMuyun}
-          progress={muyunT}
-          z={-4.6}
-          y={0.12}
-          opacity={muyunOp}
-          cover={1.18}
-          reveal="fitGrow"
-          damp={2.0}
-        />
-      ) : null}
-      {changfengOp > 0.02 ? (
-        <ScrollPanPlate
-          url={crops.pastChangfeng}
-          progress={changfengT}
-          z={-4.3}
-          y={0.08}
-          opacity={changfengOp}
-          cover={1.18}
-          reveal="fitGrow"
-          damp={2.1}
-        />
-      ) : null}
+      {/* Heroes — after curtains settled; always mounted once preloaded */}
+      <ScrollPanPlate
+        url={crops.pastMuyun}
+        progress={muyunT}
+        z={-4.6}
+        y={0.12}
+        opacity={muyunOp}
+        cover={1.18}
+        reveal="fitGrow"
+        damp={2.0}
+      />
+      <ScrollPanPlate
+        url={crops.pastChangfeng}
+        progress={changfengT}
+        z={-4.3}
+        y={0.08}
+        opacity={changfengOp}
+        cover={1.18}
+        reveal="fitGrow"
+        damp={2.1}
+      />
 
       {cards.map((c) => {
-        const op = gate * c.op;
-        if (op < 0.02) return null;
+        const op = gate * THREE.MathUtils.smoothstep(past, 0.48, 0.54) * c.op;
         return (
           <CinematicPanel
             key={c.url}
@@ -290,51 +311,128 @@ function PastRealm() {
   );
 }
 
-/** Present / journey atmospheres — one scroll-pan each. */
-function LaterAtmosphere() {
+/**
+ * 今世缘起 underlay — soft base under the 14/15 carousel,
+ * then carries through journey / memories / quiet-days so black acts
+ * never fall back to a void.
+ */
+function OriginUnderlay() {
   const present = useChapterLocal("present");
+  const journey = useChapterLocal("journey");
+  const memories = useChapterLocal("memories");
+  const quiet = useChapterLocal("quiet-days");
+  const reveal = useStoryStore((s) => s.worldReveal);
+
+  const inPresent =
+    THREE.MathUtils.smoothstep(present, 0.01, 0.05) * leaveBand(present, 0.97, 1);
+  const inJourney =
+    THREE.MathUtils.smoothstep(journey, 0.01, 0.1) * leaveBand(journey, 0.9, 0.99);
+  const inMemories =
+    THREE.MathUtils.smoothstep(memories, 0.02, 0.12) * leaveBand(memories, 0.88, 0.98);
+  const inQuiet =
+    THREE.MathUtils.smoothstep(quiet, 0.02, 0.14) * leaveBand(quiet, 0.85, 0.96);
+
+  // Soft during present (plates sit in front); stronger in later dark acts
+  const opacity =
+    reveal *
+    (inPresent * 0.38 + inJourney * 0.48 + inMemories * 0.32 + inQuiet * 0.28);
+
+  if (opacity < 0.02) return null;
+
+  // Slow breath scan — never frantic under later chapters
+  const progress =
+    present > 0.01
+      ? THREE.MathUtils.clamp(present, 0, 1)
+      : journey > 0.01
+        ? 0.35 + journey * 0.4
+        : 0.45 + Math.max(memories, quiet) * 0.3;
+
+  return (
+    <ScrollPanPlate
+      url={crops.lifeMeet}
+      progress={progress}
+      z={-8.6}
+      y={0.02}
+      opacity={opacity}
+      cover={1.28}
+      reveal="snake"
+      damp={1.8}
+      color="#c8b896"
+    />
+  );
+}
+
+/**
+ * Act 09 · 今世 — Three.js sheet 14→15 carousel.
+ * Spatial depth + staggered pans; foil copy stays in DOM.
+ */
+function PresentRealm() {
+  const past = useChapterLocal("past");
+  const present = useChapterLocal("present");
+  const reveal = useStoryStore((s) => s.worldReveal);
+  const reduced = useStoryStore((s) => s.reducedMotion);
+
+  const gate =
+    reveal *
+    THREE.MathUtils.smoothstep(present, 0.008, 0.04) *
+    leaveBand(present, 0.97, 1);
+
+  // Preload textures in late 前世 so 缘起 does not suspend the canvas
+  const warm = past > 0.82 || present > 0.001;
+  if (!warm) return null;
+
+  const fade = reduced ? 0.03 : 0.05;
+
+  return (
+    <group position={[0, 0.02, 0]}>
+      {/* Always mount once gated — avoids Suspense flash on each still enter */}
+      {PRESENT_STILLS.map((still, i) => {
+        const op = gate * presentPlateOpacity(present, still.start, still.end, fade);
+        const t = presentPlateT(present, still.start, still.end);
+        // Nearer layers lag slightly less — temporal depth
+        const damp = (still.damp ?? 2.2) * (reduced ? 1.6 : 1) + i * 0.02;
+        return (
+          <ScrollPanPlate
+            key={still.id}
+            url={still.url}
+            progress={t}
+            z={still.z}
+            y={still.y ?? 0}
+            opacity={op}
+            cover={still.cover ?? 1.16}
+            reveal={still.reveal}
+            damp={damp}
+          />
+        );
+      })}
+    </group>
+  );
+}
+
+/** Journey climax stills — keep sunset push; 缘起 underlay fills the voids. */
+function JourneyAtmosphere() {
   const journey = useChapterLocal("journey");
   const reveal = useStoryStore((s) => s.worldReveal);
 
-  const presentOp =
-    THREE.MathUtils.smoothstep(present, 0.04, 0.18) *
-    (1 - THREE.MathUtils.smoothstep(present, 0.88, 1)) *
-    0.52 *
-    reveal;
   const journeyOp =
-    THREE.MathUtils.smoothstep(journey, 0.04, 0.22) *
-    (1 - THREE.MathUtils.smoothstep(journey, 0.9, 1)) *
-    0.5 *
+    THREE.MathUtils.smoothstep(journey, 0.08, 0.2) *
+    (1 - THREE.MathUtils.smoothstep(journey, 0.55, 0.72)) *
+    0.42 *
     reveal;
+
+  if (journeyOp < 0.02) return null;
 
   return (
-    <>
-      {presentOp > 0.02 ? (
-        <ScrollPanPlate
-          url={crops.lifeMeet}
-          progress={present}
-          z={-7.8}
-          y={0}
-          opacity={presentOp}
-          cover={1.24}
-          reveal="scan"
-          damp={2.2}
-        />
-      ) : null}
-
-      {journeyOp > 0.02 ? (
-        <ScrollPanPlate
-          url={crops.roadBeforeSunset}
-          progress={journey}
-          z={-7.5}
-          y={0.05}
-          opacity={journeyOp}
-          cover={1.22}
-          reveal="scan"
-          damp={2.0}
-        />
-      ) : null}
-    </>
+    <ScrollPanPlate
+      url={crops.roadBeforeSunset}
+      progress={journey}
+      z={-7.2}
+      y={0.05}
+      opacity={journeyOp}
+      cover={1.22}
+      reveal="scan"
+      damp={2.0}
+    />
   );
 }
 
@@ -351,7 +449,7 @@ function Atmosphere() {
     if (journey > 0.05) {
       if (journey > 0.9) c.set("#12182a");
       else c.setRGB(0.1 + journey * 0.08, 0.04 + journey * 0.03, 0.03);
-    } else if (present > 0.05) c.set("#1a2438");
+    } else if (present > 0.02) c.setRGB(0.12 + present * 0.06, 0.1 + present * 0.04, 0.14 + present * 0.05);
     else if (past > 0.05) c.setRGB(0.08 + past * 0.08, 0.04 + past * 0.03, 0.1 + past * 0.06);
     else c.set("#050810");
     fogRef.current.density = 0.032 + meet * 0.008 + past * 0.006;
@@ -366,6 +464,7 @@ function CameraRig() {
   const reveal = useStoryStore((s) => s.worldReveal);
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
+  const present = useChapterLocal("present");
   const journey = useChapterLocal("journey");
   const camPos = useMemo(() => new THREE.Vector3(0, 0.95, 8.2), []);
   const look = useMemo(() => new THREE.Vector3(0, 0.1, -2.2), []);
@@ -375,7 +474,8 @@ function CameraRig() {
   useFrame(({ camera, size }, dt) => {
     const portalZ = THREE.MathUtils.lerp(8.8, 6.4, reveal);
     const portrait = size.height > size.width;
-    const fovTarget = portrait ? 50 : 40;
+    const presentNear = shotSmooth(present, 0.02, 0.35);
+    const fovTarget = portrait ? 50 - presentNear * 2 : 40 - presentNear * 1.5;
     const persp = camera as THREE.PerspectiveCamera;
     if ("fov" in persp && Math.abs(persp.fov - fovTarget) > 0.05) {
       persp.fov = THREE.MathUtils.damp(persp.fov, fovTarget, 2, dt);
@@ -404,18 +504,21 @@ function CameraRig() {
     const mythOrbit = Math.sin(past * Math.PI * 2) * 0.35 * amp;
     const mythLift = shotSmooth(past, 0.15, 0.85) * 0.55;
     const mythDolly = shotSmooth(past, 0.45, 0.9) * 0.9 * amp;
+    // Human-scale intimacy — slow dolly in through 今世 stills
+    const presentPush = shotSmooth(present, 0.05, 0.9) * 0.85 * amp;
+    const presentDrift = Math.sin(present * Math.PI * 1.5) * 0.12 * amp;
     const climaxPush = shotSmooth(journey, 0.7, 0.92) * 1.1;
     const hushPull = journey > 0.92 ? (journey - 0.92) * 2.2 : 0;
 
     posTarget.set(
-      meetX + mythOrbit + Math.sin(journey * Math.PI) * 0.28,
-      meetY + mythLift + climaxPush * 0.08 - progress * 0.06,
-      meetZ - mythDolly - climaxPush + hushPull,
+      meetX + mythOrbit + presentDrift + Math.sin(journey * Math.PI) * 0.28,
+      meetY + mythLift - presentPush * 0.1 + climaxPush * 0.08 - progress * 0.06,
+      meetZ - mythDolly - presentPush - climaxPush + hushPull,
     );
     lookTarget.set(
-      meet * 0.06 * amp + mythOrbit * 0.2,
-      -0.02 - bridgePush * 0.12 + mythLift * 0.15,
-      -2.3 - bridgePush * 0.55 - mythDolly * 0.2,
+      meet * 0.06 * amp + mythOrbit * 0.2 + presentDrift * 0.35,
+      -0.02 - bridgePush * 0.12 + mythLift * 0.15 - presentPush * 0.04,
+      -2.3 - bridgePush * 0.55 - mythDolly * 0.2 - presentPush * 0.15,
     );
 
     dampToward(camPos, posTarget, reduced ? 4.2 : 2.4, dt);
@@ -424,7 +527,11 @@ function CameraRig() {
     camera.lookAt(look);
     camera.rotation.z = THREE.MathUtils.damp(
       camera.rotation.z,
-      reduced ? 0 : Math.sin(meet * Math.PI) * 0.02 + Math.sin(past * Math.PI * 2) * 0.012,
+      reduced
+        ? 0
+        : Math.sin(meet * Math.PI) * 0.02 +
+            Math.sin(past * Math.PI * 2) * 0.012 +
+            Math.sin(present * Math.PI) * 0.008,
       2,
       dt,
     );
@@ -459,8 +566,15 @@ export function QDQCWorld() {
 
       <NightSky />
       <MeetingPlate />
-      <PastRealm />
-      <LaterAtmosphere />
+      {/* Nested Suspense — late-meeting preload; never blank the canvas on handoff */}
+      <Suspense fallback={null}>
+        <PastRealm />
+      </Suspense>
+      <Suspense fallback={null}>
+        <OriginUnderlay />
+        <PresentRealm />
+        <JourneyAtmosphere />
+      </Suspense>
     </>
   );
 }

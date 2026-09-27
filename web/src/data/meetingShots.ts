@@ -42,18 +42,38 @@ export const MEETING_CAPTIONS = [
 
 /**
  * Title: rise → hold → exit inside meeting.
- * Tiny past residue only for soft crossfade (must not cover 暮云).
+ * Exit overlaps closed 前世 doors (no black void between acts).
  */
 export const MEETING_TITLE = {
   gate: { start: 0.72, peak: 0.78 },
   lineA: { start: 0.74, peak: 0.8 },
   lineB: { start: 0.78, peak: 0.84 },
   lineC: { start: 0.82, peak: 0.88 },
-  /** Soft exit before chapter boundary — frees 前世 */
-  exitStart: 0.93,
-  exitEnd: 0.995,
+  /** Soft exit as myth doors warm under the title */
+  exitStart: 0.9,
+  exitEnd: 0.985,
   /** Minimal residue into past (just a breath, not a second coda) */
-  pastCarry: 0.035,
+  pastCarry: 0.04,
+} as const;
+
+/**
+ * Meeting → Past visual handoff (shared by World NightSky / MeetingPlate / PastRealm).
+ * Doors warm closed under the title; bridge holds until doors cover the void.
+ */
+export const MEETING_PAST_HANDOFF = {
+  /** Preload 前世 textures while title still holds */
+  preloadFrom: 0.7,
+  /** Closed door curtains fade in under title */
+  doorWarmStart: 0.86,
+  doorWarmEnd: 0.96,
+  /** Bridge / night stay until doors are solid */
+  bridgeHoldUntil: 0.94,
+  bridgeGoneBy: 1,
+  /** Past doors begin opening only after act owns the frame */
+  doorOpenStart: 0.1,
+  doorOpenEnd: 0.68,
+  /** Front 暮云 hero waits for curtains — no messy overlap */
+  heroStart: 0.12,
 } as const;
 
 export function smoothstep(v: number, a: number, b: number) {

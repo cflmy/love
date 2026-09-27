@@ -106,36 +106,42 @@ export const pastScenes: SceneBeat[] = [
   },
 ];
 
-/** Act 09 · 今世 — human scale; plates follow corner marks 1→4 */
+/** Act 09 · 今世 — sheet 14 corner marks 1→5 */
 export const presentScenes: SceneBeat[] = [
   {
     id: "life-meet",
     image: crops.lifeMeet,
-    caption: "相遇",
+    caption: "1 相遇",
     line: "人海之中，很幸运，我们相遇了。",
     layout: "full",
   },
   {
     id: "life-know",
     image: crops.lifeKnow,
-    caption: "相知",
+    caption: "2 相知",
     line: "一起发呆，一起做很多平凡的小事。",
     layout: "full",
   },
   {
     id: "life-road",
     image: crops.lifeRoad,
-    caption: "山高路远",
+    caption: "3 山高路远",
     line: "山高路远，也要一起走。",
     layout: "full",
   },
   {
     id: "life-seal",
     image: crops.lifeLuck,
-    caption: "祥云聚顶",
+    caption: "4 祥云聚顶",
     line: "祥云聚顶，鸿运当头。",
-    layout: "pair",
-    images: [crops.lifeLuck, crops.lifeFuture],
+    layout: "full",
+  },
+  {
+    id: "life-future",
+    image: crops.lifeFuture,
+    caption: "5 未来",
+    line: "与你，共赴更长的明天。",
+    layout: "full",
   },
 ];
 

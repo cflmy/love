@@ -79,14 +79,14 @@ export const chapters: Chapter[] = [
     title: "今世",
     subtitle: "祥云聚顶 · 鸿运当头",
     navLabel: "03 今世",
-    /** Longer span so each still can finish a TL→BR scan */
-    scrollSpan: 5.2,
+    /** Sheets 14+15 in WebGL + foil on 缘起 — long dwell for romantic pace */
+    scrollSpan: 14,
     themeTrack: "present",
     color: "#C7A66A",
     copy: [
-      "晏永鸿 —— 王家祥",
-      "祥云聚顶，鸿运当头。",
-      "人间烟火里，我们重新学会相爱。",
+      "Que dure, que câlin.",
+      "Quiet days, quiet cuddles.",
+      "相逢鹊渡，相守情长，故与君鹊渡情长。",
     ],
   },
   {
@@ -95,7 +95,7 @@ export const chapters: Chapter[] = [
     title: "山高路远",
     subtitle: "双向奔赴",
     navLabel: "04 山高路远",
-    scrollSpan: 7.2,
+    scrollSpan: 12,
     themeTrack: "journey",
     color: "#9C493E",
     copy: [

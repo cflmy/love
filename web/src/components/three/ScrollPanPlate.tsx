@@ -5,6 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { imageSize } from "@/data/imageSize";
+import { LIFE_MEET_SNAKE, snakeScan } from "@/lib/snakeScan";
 
 function mediaPath(url: string) {
   return url.split("?")[0] ?? url;
@@ -18,13 +19,14 @@ function textureAspect(url: string, texture: THREE.Texture) {
   return 16 / 9;
 }
 
-export type RevealMode = "cover" | "fitGrow" | "scan";
+export type RevealMode = "cover" | "fitGrow" | "scan" | "snake";
 
 /**
  * Full-bleed backdrop that keeps intrinsic aspect (no stretch).
  * - cover: oversized cover + optional axis pan
  * - fitGrow: start contain (full art readable) → grow into cover while scanning
  * - scan: cover with forced L→R / T→B ken-burns scan
+ * - snake: calm left-column → right → faces
  */
 export function ScrollPanPlate({
   url,
@@ -97,6 +99,7 @@ export function ScrollPanPlate({
     let planeH = coverH;
     let tx = 0;
     let ty = y;
+    let snap = false;
 
     if (reveal === "fitGrow") {
       const grow = THREE.MathUtils.smoothstep(t, 0, 0.42);
@@ -107,14 +110,37 @@ export function ScrollPanPlate({
       const overflowY = Math.max(0, planeH - visibleH);
       // Start reading top-left text, then scan to bottom-right
       tx = THREE.MathUtils.lerp(overflowX * 0.42, -overflowX * 0.48, scan);
-      ty = y + THREE.MathUtils.lerp(overflowY * 0.4, -overflowY * 0.42, scan);
+      ty = y + THREE.MathUtils.lerp(-overflowY * 0.4, overflowY * 0.42, scan);
+      snap = t < 0.04;
     } else if (reveal === "scan") {
-      planeW = coverW * 1.12;
-      planeH = coverH * 1.12;
+      // Hold TL briefly so chapter enter / era flash never land mid-pan
+      const hold = 0.14;
+      const scan = THREE.MathUtils.smoothstep(Math.max(0, (t - hold) / (1 - hold)), 0, 1);
+      planeW = coverW * 1.2;
+      planeH = coverH * 1.2;
       const overflowX = Math.max(0, planeW - visibleW);
       const overflowY = Math.max(0, planeH - visibleH);
-      tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, t);
-      ty = y + THREE.MathUtils.lerp(overflowY * 0.5, -overflowY * 0.5, t);
+      tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, scan);
+      // +Y is up in Three — top of texture needs negative offset
+      ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, scan);
+      snap = t <= hold;
+    } else if (reveal === "snake") {
+      const focus = snakeScan(t, LIFE_MEET_SNAKE);
+      // Full-art window: both axes exceed frustum by focus.scale (same as DOM)
+      let imgH = visibleH * focus.scale;
+      let imgW = imgH * aspect;
+      if (imgW < visibleW * focus.scale) {
+        imgW = visibleW * focus.scale;
+        imgH = imgW / aspect;
+      }
+      planeW = imgW;
+      planeH = imgH;
+      const overflowX = Math.max(0, imgW - visibleW);
+      const overflowY = Math.max(0, imgH - visibleH);
+      // focus 0 = left/top of art → plane shifts +X / -Y into view
+      tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, focus.x);
+      ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, focus.y);
+      snap = t <= (LIFE_MEET_SNAKE.hold ?? 0.05);
     } else {
       const overflowX = Math.max(0, planeW - visibleW);
       const overflowY = Math.max(0, planeH - visibleH);
@@ -133,9 +159,13 @@ export function ScrollPanPlate({
     scaleSmoothed.current = THREE.MathUtils.damp(scaleSmoothed.current, 1, damp, dt);
     mesh.current.scale.set(planeW * scaleSmoothed.current, planeH * scaleSmoothed.current, 1);
 
-    smoothed.current.x = THREE.MathUtils.damp(smoothed.current.x, tx, damp, dt);
-    smoothed.current.y = THREE.MathUtils.damp(smoothed.current.y, ty, damp, dt);
-    smoothed.current.z = z;
+    if (snap) {
+      smoothed.current.set(tx, ty, z);
+    } else {
+      smoothed.current.x = THREE.MathUtils.damp(smoothed.current.x, tx, damp, dt);
+      smoothed.current.y = THREE.MathUtils.damp(smoothed.current.y, ty, damp, dt);
+      smoothed.current.z = z;
+    }
     mesh.current.position.copy(smoothed.current);
 
     const mat = mesh.current.material as THREE.MeshBasicMaterial;
