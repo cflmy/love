@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { FrameImage } from "@/components/ui/FrameImage";
-import { PhotoFrame } from "@/components/ui/PhotoFrame";
 import { StoryModal } from "@/components/ui/StoryModal";
 import { crops } from "@/data/assets";
 import { chromeCopy } from "@/data/chrome";
+import { MEMORY_WATERFALL } from "@/data/gallery";
 import { useStoryStore } from "@/store/story";
 
 type MemoryNode = {
@@ -68,11 +68,12 @@ const MEMORIES: MemoryNode[] = [
   },
 ];
 
-/** Lantern timeline from the kit — gold path, round stills, real crops. */
+/** Lantern timeline + waterfall of story stills that were barely surfaced. */
 export function MemoriesTimeline() {
   const locale = useStoryStore((s) => s.locale);
   const text = chromeCopy(locale);
   const [memory, setMemory] = useState<(typeof MEMORIES)[number] | null>(null);
+  const [tile, setTile] = useState<(typeof MEMORY_WATERFALL)[number] | null>(null);
 
   return (
     <section className="qd-timeline" aria-label="我们">
@@ -95,11 +96,20 @@ export function MemoriesTimeline() {
         </ol>
       </div>
 
-      <div className="qd-gallery" aria-label="照片">
-        <PhotoFrame src={crops.daySpecial} caption="Our Memories" tilt={-7} />
-        <PhotoFrame src={crops.roadEmbrace} caption="More Days Together" tilt={3} />
-        <PhotoFrame src={crops.dayTravel} caption="On the Road" tilt={6} />
+      <div className="qd-waterfall" aria-label="照片瀑布流">
+        {MEMORY_WATERFALL.map((item, i) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`qd-waterfall__item qd-waterfall__item--${(i % 5) + 1}`}
+            onClick={() => setTile(item)}
+          >
+            <FrameImage src={item.src} alt="" sizes="(max-width: 720px) 46vw, 280px" />
+            <span>{item.caption}</span>
+          </button>
+        ))}
       </div>
+
       <StoryModal
         open={Boolean(memory)}
         title={memory ? `${text.memoryTitle}` : text.memoryTitle}
@@ -108,6 +118,15 @@ export function MemoriesTimeline() {
         confirmLabel={text.yes}
         onCancel={() => setMemory(null)}
         onConfirm={() => setMemory(null)}
+      />
+      <StoryModal
+        open={Boolean(tile)}
+        title={tile?.caption ?? text.memoryTitle}
+        hint={text.memoryHint}
+        cancelLabel={text.cancel}
+        confirmLabel={text.yes}
+        onCancel={() => setTile(null)}
+        onConfirm={() => setTile(null)}
       />
     </section>
   );

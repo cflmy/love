@@ -8,6 +8,7 @@ import { crops, parts } from "@/data/assets";
 import { chapterProgressBounds } from "@/data/chapters";
 import { MEETING_SHOTS, smoothstep as shotSmooth } from "@/data/meetingShots";
 import { useStoryStore } from "@/store/story";
+import { ScrollPanPlate, SubjectBillboard } from "./ScrollPanPlate";
 
 /**
  * Persistent cinematic world — clear depth, one subject hierarchy.
@@ -92,37 +93,28 @@ function NightSky() {
   const reveal = useStoryStore((s) => s.worldReveal);
   const meet = useChapterLocal("meeting");
   const past = useChapterLocal("past");
-  const mesh = useRef<THREE.Mesh>(null);
-  // Single far plate — darkened so it reads as sky, not a poster
-  const texture = useTexture(crops.bridgeNight);
-  texture.colorSpace = THREE.SRGBColorSpace;
-
-  useFrame(() => {
-    if (!mesh.current) return;
-    const leave = 1 - THREE.MathUtils.smoothstep(past, 0.02, 0.28);
-    const mat = mesh.current.material as THREE.MeshBasicMaterial;
-    mat.opacity = reveal * leave * (0.28 + meet * 0.08);
-  });
+  const leave = 1 - THREE.MathUtils.smoothstep(past, 0.02, 0.28);
+  const opacity = reveal * leave * (0.34 + meet * 0.12);
 
   return (
-    <ParallaxLayer z={-14} y={0.6} mul={0.08} damp={1.1}>
-      <mesh ref={mesh} scale={[22, 12, 1]}>
+    <group>
+      {/* Cover + scroll-pan at true world Z — never stretch the night plate */}
+      <ScrollPanPlate
+        url={crops.bridgeNight}
+        progress={meet}
+        z={-14}
+        y={0.35}
+        opacity={opacity}
+        cover={1.28}
+        panAxis="auto"
+        damp={1.4}
+        color="#7a8eaa"
+      />
+      <mesh position={[0, 4.6, -13.7]} scale={[28, 6, 1]}>
         <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          map={texture}
-          transparent
-          opacity={0.3}
-          depthWrite={false}
-          color="#6a7f9c"
-          toneMapped={false}
-        />
+        <meshBasicMaterial color="#050810" transparent opacity={0.5} depthWrite={false} />
       </mesh>
-      {/* Soft vignette planes — pure depth, no texture noise */}
-      <mesh position={[0, 4.2, 0.2]} scale={[24, 5, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color="#050810" transparent opacity={0.55} depthWrite={false} />
-      </mesh>
-    </ParallaxLayer>
+    </group>
   );
 }
 
@@ -300,12 +292,9 @@ function Water() {
 
 function MagpieBridge({ lit }: { lit: number }) {
   const group = useRef<THREE.Group>(null);
-  const plate = useRef<THREE.Mesh>(null);
   const meet = useChapterLocal("meeting");
   const reveal = useStoryStore((s) => s.worldReveal);
   const past = useChapterLocal("past");
-  const texture = useTexture(crops.meetBridge);
-  texture.colorSpace = THREE.SRGBColorSpace;
   const target = useMemo(() => new THREE.Vector3(), []);
 
   const lamps = useMemo(
@@ -313,28 +302,29 @@ function MagpieBridge({ lit }: { lit: number }) {
     [],
   );
 
+  const leave = 1 - THREE.MathUtils.smoothstep(past, 0.06, 0.32);
+  const awake = shotSmooth(meet, MEETING_SHOTS.bridge.start, MEETING_SHOTS.meeting.end);
+  const plateOp =
+    reveal * leave * (0.18 + THREE.MathUtils.smoothstep(meet, 0.1, 0.4) * 0.32 + awake * 0.42);
+
   useFrame((_, dt) => {
     if (!group.current) return;
-    const leave = 1 - THREE.MathUtils.smoothstep(past, 0.06, 0.32);
-    const awake = shotSmooth(meet, MEETING_SHOTS.bridge.start, MEETING_SHOTS.meeting.end);
     target.set(0, -0.72 - meet * 0.06, -2.15);
     dampToward(group.current.position, target, 3.6, dt);
     group.current.visible = reveal * leave > 0.04;
-    if (plate.current) {
-      const mat = plate.current.material as THREE.MeshBasicMaterial;
-      // One clear bridge plate — builds as subject, never a second wallpaper
-      mat.opacity = reveal * leave * (0.15 + THREE.MathUtils.smoothstep(meet, 0.1, 0.4) * 0.35 + awake * 0.4);
-    }
   });
 
   return (
     <group ref={group} position={[0, -0.72, -2.15]}>
-      {/* Soft art plate — midground subject only */}
-      <mesh ref={plate} position={[0, 0.85, -0.15]} scale={[5.8, 3.6, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial map={texture} transparent opacity={0.2} depthWrite={false} toneMapped={false} />
-      </mesh>
-      {/* Structural arch in real 3D */}
+      {/* Intrinsic bridge art — subject, not stretched wallpaper */}
+      <SubjectBillboard
+        url={crops.meetBridge}
+        position={[0, 0.95, -0.12]}
+        height={2.85}
+        opacity={plateOp}
+        progress={meet}
+        parallax={0.2}
+      />
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0.15, 0]}>
         <torusGeometry args={[2.6, 0.055, 10, 64, Math.PI]} />
         <meshStandardMaterial color="#243a5c" metalness={0.35} roughness={0.65} />
@@ -362,40 +352,32 @@ function MagpieBridge({ lit }: { lit: number }) {
 }
 
 function ForegroundBranch() {
-  const textures = useTexture([parts.floaters[0]]);
-  textures.forEach((t) => {
-    t.colorSpace = THREE.SRGBColorSpace;
-  });
   const group = useRef<THREE.Group>(null);
   const meet = useChapterLocal("meeting");
   const reveal = useStoryStore((s) => s.worldReveal);
   const past = useChapterLocal("past");
   const target = useMemo(() => new THREE.Vector3(), []);
+  const leave = 1 - THREE.MathUtils.smoothstep(past, 0.1, 0.4);
+  const opacity = reveal * leave * 0.55;
 
   useFrame((_, dt) => {
     if (!group.current) return;
-    const leave = 1 - THREE.MathUtils.smoothstep(past, 0.1, 0.4);
     target.set(-3.1 + meet * -1.5, 0.55 - meet * 0.4, 2.1);
     dampToward(group.current.position, target, 5.8, dt);
     group.current.rotation.z = -0.28 - meet * 0.18;
     group.current.visible = reveal * leave > 0.12;
-    const mat = (group.current.children[0] as THREE.Mesh).material as THREE.MeshBasicMaterial;
-    mat.opacity = reveal * leave * 0.42;
   });
 
   return (
     <group ref={group} position={[-3.1, 0.55, 2.1]}>
-      <mesh scale={[1.35, 0.85, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial
-          map={textures[0]}
-          transparent
-          depthWrite={false}
-          opacity={0.42}
-          side={THREE.DoubleSide}
-          toneMapped={false}
-        />
-      </mesh>
+      <SubjectBillboard
+        url={parts.floaters[0]}
+        position={[0, 0, 0]}
+        height={0.95}
+        opacity={opacity}
+        progress={meet}
+        parallax={0.55}
+      />
     </group>
   );
 }
@@ -522,49 +504,125 @@ function Magpie() {
   );
 }
 
-/* ─── Later acts: one plate each, never stacked on meeting collage ─── */
+/* ─── Later acts: scroll-pan backdrops + cut-out subjects (no stretch) ─── */
 
 function ChapterAtmosphere() {
   const past = useChapterLocal("past");
   const present = useChapterLocal("present");
   const journey = useChapterLocal("journey");
   const reveal = useStoryStore((s) => s.worldReveal);
-  const pastTex = useTexture(crops.pastMuyun);
-  const presentTex = useTexture(crops.lifeMeet);
-  const journeyTex = useTexture(crops.roadBeforeSunset);
-  pastTex.colorSpace = presentTex.colorSpace = journeyTex.colorSpace = THREE.SRGBColorSpace;
 
   const pastOp =
     THREE.MathUtils.smoothstep(past, 0.04, 0.28) *
     (1 - THREE.MathUtils.smoothstep(past, 0.88, 1)) *
-    0.55 *
+    0.62 *
     reveal;
-  const presentOp = THREE.MathUtils.smoothstep(present, 0.06, 0.3) * 0.42 * reveal;
+  const presentOp = THREE.MathUtils.smoothstep(present, 0.06, 0.3) * 0.52 * reveal;
   const journeyOp =
     THREE.MathUtils.smoothstep(journey, 0.04, 0.22) *
     (1 - THREE.MathUtils.smoothstep(journey, 0.9, 1)) *
-    0.45 *
+    0.55 *
+    reveal;
+
+  const pastSubject =
+    THREE.MathUtils.smoothstep(past, 0.12, 0.35) *
+    (1 - THREE.MathUtils.smoothstep(past, 0.82, 1)) *
+    reveal;
+  const presentSubject = THREE.MathUtils.smoothstep(present, 0.14, 0.4) * reveal;
+  const journeySubject =
+    THREE.MathUtils.smoothstep(journey, 0.1, 0.35) *
+    (1 - THREE.MathUtils.smoothstep(journey, 0.85, 1)) *
     reveal;
 
   return (
     <>
       {pastOp > 0.02 ? (
-        <mesh position={[0, 0.15, -7.5]} scale={[14, 8, 1]}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial map={pastTex} transparent opacity={pastOp} depthWrite={false} />
-        </mesh>
+        <ScrollPanPlate
+          url={crops.pastMuyun}
+          progress={past}
+          z={-8.2}
+          y={0.1}
+          opacity={pastOp}
+          cover={1.26}
+          panAxis="auto"
+          damp={2.2}
+        />
       ) : null}
+      {pastSubject > 0.02 ? (
+        <>
+          <SubjectBillboard
+            url={parts.magpieSpread}
+            position={[-1.55, 0.55, -4.2]}
+            height={1.35}
+            opacity={pastSubject * 0.85}
+            progress={past}
+            parallax={0.85}
+          />
+          <SubjectBillboard
+            url={parts.floaters[5]}
+            position={[2.1, 1.05, -3.4]}
+            height={0.55}
+            opacity={pastSubject * 0.55}
+            progress={past}
+            parallax={1.15}
+          />
+        </>
+      ) : null}
+
       {presentOp > 0.02 ? (
-        <mesh position={[0, 0, -7.2]} scale={[13, 7.4, 1]}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial map={presentTex} transparent opacity={presentOp} depthWrite={false} />
-        </mesh>
+        <ScrollPanPlate
+          url={crops.lifeMeet}
+          progress={present}
+          z={-7.8}
+          y={0}
+          opacity={presentOp}
+          cover={1.24}
+          panAxis="auto"
+          damp={2.4}
+        />
       ) : null}
+      {presentSubject > 0.02 ? (
+        <>
+          <SubjectBillboard
+            url={parts.butterflyFront}
+            position={[1.7, 0.35, -3.6]}
+            height={0.95}
+            opacity={presentSubject * 0.7}
+            progress={present}
+            parallax={0.95}
+          />
+          <SubjectBillboard
+            url={parts.floaters[2]}
+            position={[-2.0, 0.9, -2.8]}
+            height={0.48}
+            opacity={presentSubject * 0.5}
+            progress={present}
+            parallax={1.3}
+          />
+        </>
+      ) : null}
+
       {journeyOp > 0.02 ? (
-        <mesh position={[0, 0.05, -7]} scale={[13.5, 7.6, 1]}>
-          <planeGeometry args={[1, 1]} />
-          <meshBasicMaterial map={journeyTex} transparent opacity={journeyOp} depthWrite={false} />
-        </mesh>
+        <ScrollPanPlate
+          url={crops.roadBeforeSunset}
+          progress={journey}
+          z={-7.5}
+          y={0.05}
+          opacity={journeyOp}
+          cover={1.25}
+          panAxis="auto"
+          damp={2.0}
+        />
+      ) : null}
+      {journeySubject > 0.02 ? (
+        <SubjectBillboard
+          url={parts.magpiePerch}
+          position={[0.35, 0.15, -3.8]}
+          height={1.15}
+          opacity={journeySubject * 0.75}
+          progress={journey}
+          parallax={0.7}
+        />
       ) : null}
     </>
   );
