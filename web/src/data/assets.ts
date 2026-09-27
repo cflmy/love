@@ -13,7 +13,7 @@ export const palette = {
  * Bump when rewriting public/media binaries in place.
  * Same path + new bytes is invisible to next/image & browser caches without this.
  */
-export const MEDIA_REV = "20260927i";
+export const MEDIA_REV = "20260927k";
 
 /** Cache-bust polished media URLs (path stays under public/). */
 export function media(path: string): string {

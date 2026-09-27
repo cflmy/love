@@ -1,65 +1,64 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { brand } from "@/data/assets";
-import { chapters } from "@/data/chapters";
+import { NAV_ITEMS, chromeCopy } from "@/data/chrome";
+import type { ChapterId } from "@/data/chapters";
+import { useGoChapter } from "@/engine/goChapter";
 import { useStoryStore } from "@/store/story";
+import { StoryIcon } from "./icons";
 
-export function ChapterNav() {
-  const [open, setOpen] = useState(false);
-  const entered = useStoryStore((s) => s.entered);
+function activeKey(id: ChapterId): ChapterId {
+  if (id === "opening") return "meeting";
+  return id;
+}
+
+/** Side chapter list from the navigation-menu sheet. */
+export function ChapterNav({ open, onClose }: { open: boolean; onClose: () => void }) {
   const chapterId = useStoryStore((s) => s.chapterId);
-  const progress = useStoryStore((s) => s.progress);
+  const locale = useStoryStore((s) => s.locale);
+  const go = useGoChapter();
+  const text = chromeCopy(locale);
+  const current = activeKey(chapterId);
 
-  if (!entered) return null;
+  const choose = (id: ChapterId) => {
+    go(id);
+    onClose();
+  };
 
   return (
-    <div className="pointer-events-none fixed left-4 top-4 z-40 md:left-6 md:top-6">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="chapter-nav__mark pointer-events-auto"
-        aria-expanded={open}
-      >
-        <Image src={brand.icon} alt="" width={40} height={40} className="chapter-nav__logo" />
-        <span className="chapter-nav__qdqc">
-          QDQC
-          <span>∞</span>
-        </span>
-      </button>
-
-      <div
-        className={`pointer-events-auto mt-4 overflow-hidden rounded-2xl border border-[#C7A66A]/25 bg-[#050810]/75 p-4 backdrop-blur-md transition-all duration-500 ${
-          open ? "max-h-[70vh] opacity-100" : "max-h-0 opacity-0 border-transparent p-0"
-        }`}
-      >
-        <ul className="space-y-2">
-          {chapters.map((c) => (
-            <li key={c.id}>
-              <span
-                className={`block font-serif text-sm tracking-wide ${
-                  c.id === chapterId ? "text-[#C7A66A]" : "text-[#F7F3E9]/65"
-                }`}
-              >
-                {c.navLabel}
+    <div id="chapter-menu" className={`chapter-menu chapter-menu--drawer qd-scroll ${open ? "is-open" : ""}`} hidden={!open}>
+      <div className="chapter-menu__orbs qd-scroll">
+        {NAV_ITEMS.filter((item) => item.image).map((item, index) => (
+          <button
+            key={item.id}
+            type="button"
+            className={`chapter-orb ${item.id === current ? "is-active" : ""}`}
+            onClick={() => choose(item.id)}
+          >
+            <span className="chapter-orb__ring">
+              <Image src={item.image!} alt="" width={72} height={72} className="chapter-orb__img" />
+            </span>
+            <span className="chapter-orb__index">{index + 1}</span>
+            <span className="chapter-orb__label">{text[item.key]}</span>
+          </button>
+        ))}
+      </div>
+      <ul className="chapter-menu__list qd-scroll">
+        {NAV_ITEMS.map((item) => (
+          <li key={item.id}>
+            <button
+              type="button"
+              className={`chapter-menu__item ${item.id === current ? "is-active" : ""}`}
+              onClick={() => choose(item.id)}
+            >
+              <StoryIcon name={item.icon} />
+              <span>
+                <strong>{text[item.key]}</strong>
               </span>
-            </li>
-          ))}
-        </ul>
-        <div className="nav-extra">
-          <Link href="/card">NFC · Card</Link>
-          <Link href="/letter">Letter</Link>
-        </div>
-      </div>
-
-      <div className="pointer-events-none mt-6 h-24 w-[2px] overflow-hidden rounded bg-[#F7F3E9]/15">
-        <div
-          className="w-full bg-[#C7A66A] transition-[height] duration-300"
-          style={{ height: `${Math.round(progress * 100)}%` }}
-        />
-      </div>
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

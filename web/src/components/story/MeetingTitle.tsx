@@ -2,20 +2,11 @@
 
 import { useMemo } from "react";
 import { chapterProgressBounds } from "@/data/chapters";
+import { MEETING_TITLE, smoothstep } from "@/data/meetingShots";
 import { useStoryStore } from "@/store/story";
 
-function clamp01(v: number) {
-  return Math.min(1, Math.max(0, v));
-}
-
-function smooth(v: number, a: number, b: number) {
-  if (b <= a) return v >= b ? 1 : 0;
-  const t = clamp01((v - a) / (b - a));
-  return t * t * (3 - 2 * t);
-}
-
 /**
- * Fixed overlay during 相逢鹊渡 — blur → focus late in the chapter (docs: 标题后置).
+ * Fixed overlay during 相逢鹊渡 — blur → focus only after meeting (STORY_FLOW G1).
  */
 export function MeetingTitle() {
   const progress = useStoryStore((s) => s.progress);
@@ -26,15 +17,15 @@ export function MeetingTitle() {
     const bounds = chapterProgressBounds();
     const b = bounds.find((x) => x.id === "meeting");
     if (!b) return 0;
-    return clamp01((progress - b.start) / Math.max(0.0001, b.end - b.start));
+    return Math.min(1, Math.max(0, (progress - b.start) / Math.max(0.0001, b.end - b.start)));
   }, [progress]);
 
   if (chapterId !== "meeting") return null;
 
-  const gate = smooth(local, 0.72, 0.84);
-  const lineA = smooth(local, 0.78, 0.88);
-  const lineB = smooth(local, 0.86, 0.94);
-  const lineC = smooth(local, 0.92, 0.99);
+  const gate = smoothstep(local, MEETING_TITLE.gate.start, MEETING_TITLE.gate.end);
+  const lineA = smoothstep(local, MEETING_TITLE.lineA.start, MEETING_TITLE.lineA.end);
+  const lineB = smoothstep(local, MEETING_TITLE.lineB.start, MEETING_TITLE.lineB.end);
+  const lineC = smoothstep(local, MEETING_TITLE.lineC.start, MEETING_TITLE.lineC.end);
 
   if (gate < 0.02) return null;
 

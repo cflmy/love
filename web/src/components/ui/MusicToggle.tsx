@@ -2,29 +2,38 @@
 
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore } from "@/store/story";
+import { StoryIcon } from "./icons";
 
+/** Tiny note control — the music button from the kit, not a media bar. */
 export function MusicToggle() {
   const entered = useStoryStore((s) => s.entered);
   const musicEnabled = useStoryStore((s) => s.musicEnabled);
   const setMusicEnabled = useStoryStore((s) => s.setMusicEnabled);
-  const chapterId = useStoryStore((s) => s.chapterId);
+  const progress = useStoryStore((s) => s.progress);
 
   if (!entered) return null;
 
   return (
     <button
       type="button"
+      className={`qd-note ${musicEnabled ? "is-on" : ""}`}
       onClick={() => {
         const next = !musicEnabled;
         setMusicEnabled(next);
         MusicEngine.setEnabled(next);
       }}
-      className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-[#C7A66A]/40 bg-[#050810]/55 text-[#F7F3E9] backdrop-blur-md transition hover:border-[#C7A66A] md:bottom-8 md:right-8"
       aria-label={musicEnabled ? "关闭音乐" : "开启音乐"}
-      title={chapterId}
+      aria-pressed={musicEnabled}
     >
-      <span className="font-serif text-lg tracking-widest">
-        {musicEnabled ? "♪" : "–"}
+      <span className="qd-note__disc" aria-hidden>
+        <StoryIcon name={musicEnabled ? "music" : "pause"} />
+      </span>
+      <span className="qd-note__copy">
+        <strong>{musicEnabled ? "音乐" : "静音"}</strong>
+        <em>{musicEnabled ? "Music" : "Muted"}</em>
+        <span className="qd-note__bar">
+          <i style={{ width: `${Math.round(progress * 100)}%` }} />
+        </span>
       </span>
     </button>
   );

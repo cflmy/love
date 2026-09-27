@@ -74,7 +74,8 @@ export function OpeningGate() {
 
     setEntered(true);
     setPhase("done");
-    MusicEngine.play("prayer", 2400);
+    // Portal opens into Act 03 · 相逢鹊渡
+    MusicEngine.play("butterfly", 2400);
     setBusy(false);
   };
 
@@ -161,7 +162,8 @@ export function OpeningGate() {
           className="opening-gate__cta"
           variant="start"
           label={ctaLabel(phase, entrySource === "nfc")}
-          width={300}
+          hint={phase === "invite" ? "Start the Journey" : undefined}
+          width={280}
           onClick={runRitual}
           disabled={phase !== "invite" || busy}
         />

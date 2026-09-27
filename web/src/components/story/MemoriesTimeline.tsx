@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { FrameImage } from "@/components/ui/FrameImage";
+import { PhotoFrame } from "@/components/ui/PhotoFrame";
+import { StoryModal } from "@/components/ui/StoryModal";
 import { crops } from "@/data/assets";
+import { chromeCopy } from "@/data/chrome";
+import { useStoryStore } from "@/store/story";
 
-export type MemoryNode = {
+type MemoryNode = {
   id: string;
   date: string;
   title: string;
   line: string;
-  side: "left" | "right";
   photo: string;
 };
 
@@ -17,32 +21,28 @@ const MEMORIES: MemoryNode[] = [
     id: "m1",
     date: "缘起",
     title: "相遇",
-    line: "人海之中，灯光如星，很幸运，我们相遇了。",
-    side: "left",
+    line: "人海之中，灯光如星。",
     photo: crops.daySight,
   },
   {
     id: "m2",
     date: "日常",
     title: "相知",
-    line: "一起发呆，一起做很多平凡的小事。",
-    side: "right",
+    line: "一起做很多平凡的小事。",
     photo: crops.dayDaily,
   },
   {
     id: "m3",
     date: "旅途",
-    title: "山高路远",
-    line: "无论多远，我都会奔赴你的身边。",
-    side: "left",
+    title: "第一次远行",
+    line: "无论多远，我都会奔赴。",
     photo: crops.dayTravel,
   },
   {
     id: "m4",
     date: "特别",
-    title: "纪念日",
-    line: "有些日子，只属于我们两个人。",
-    side: "right",
+    title: "特别的日子",
+    line: "有些日子，只属于我们。",
     photo: crops.daySpecial,
   },
   {
@@ -50,70 +50,65 @@ const MEMORIES: MemoryNode[] = [
     date: "此刻",
     title: "两杯茶",
     line: "一份安静，一份陪伴。",
-    side: "left",
     photo: crops.dayTea,
   },
   {
     id: "m6",
-    date: "明天",
-    title: "更远一点",
-    line: "与你，共赴更长的明天。",
-    side: "right",
-    photo: crops.dayTomorrow,
-  },
-  {
-    id: "m7",
-    date: "人间",
-    title: "鸿运",
-    line: "祥云聚顶，鸿运当头。",
-    side: "left",
-    photo: crops.lifeLuck,
-  },
-  {
-    id: "m8",
     date: "相拥",
     title: "归来",
     line: "只要你回来，太阳永不落山。",
-    side: "right",
     photo: crops.roadEmbrace,
+  },
+  {
+    id: "m7",
+    date: "明天",
+    title: "更远一点",
+    line: "与你，共赴更长的明天。",
+    photo: crops.dayTomorrow,
   },
 ];
 
-/** 鹊桥时间线 — lantern nodes with real cropped photos. */
+/** Lantern timeline from the kit — gold path, round stills, real crops. */
 export function MemoriesTimeline() {
+  const locale = useStoryStore((s) => s.locale);
+  const text = chromeCopy(locale);
+  const [memory, setMemory] = useState<(typeof MEMORIES)[number] | null>(null);
+
   return (
-    <section className="memories-bridge" aria-label="我们">
-      <div className="memories-bridge__intro">
-        <p className="chapter-panel__eyebrow">Memories</p>
-        <h2>我们</h2>
-        <p>每一盏灯，都是一次记得。</p>
+    <section className="qd-timeline" aria-label="我们">
+      <div className="qd-timeline__scroller">
+        <div className="qd-timeline__line" aria-hidden />
+        <ol className="qd-timeline__nodes">
+          {MEMORIES.map((node, i) => (
+            <li key={node.id} className="qd-node">
+              {i % 2 === 1 ? <span className="qd-lantern" aria-hidden /> : null}
+              <button type="button" className="qd-node__hit" onClick={() => setMemory(node)}>
+                <span className="qd-node__ring">
+                  <FrameImage src={node.photo} alt="" sizes="120px" className="qd-node__img" />
+                </span>
+                <p className="qd-node__date">{node.date}</p>
+                <h3>{node.title}</h3>
+                <p>{node.line}</p>
+              </button>
+            </li>
+          ))}
+        </ol>
       </div>
 
-      <div className="memories-bridge__rail" aria-hidden>
-        <div className="memories-bridge__arch" />
+      <div className="qd-gallery" aria-label="照片">
+        <PhotoFrame src={crops.daySpecial} caption="Our Memories" tilt={-7} />
+        <PhotoFrame src={crops.roadEmbrace} caption="More Days Together" tilt={3} />
+        <PhotoFrame src={crops.dayTravel} caption="On the Road" tilt={6} />
       </div>
-
-      <ul className="memories-bridge__nodes">
-        {MEMORIES.map((node, i) => (
-          <li key={node.id} className={`memory-node memory-node--${node.side}`}>
-            <button type="button" className="memory-lantern" aria-label={node.title}>
-              <span className="memory-lantern__glow" />
-              <span className="memory-lantern__index">{String(i + 1).padStart(2, "0")}</span>
-            </button>
-            <article
-              className="memory-card"
-              style={{ ["--tilt" as string]: `${i % 2 === 0 ? -3 : 4}deg` }}
-            >
-              <div className="memory-card__photo">
-                <FrameImage src={node.photo} sizes="(max-width: 768px) 70vw, 280px" className="memory-card__img" />
-              </div>
-              <p className="memory-card__date">{node.date}</p>
-              <h3>{node.title}</h3>
-              <p>{node.line}</p>
-            </article>
-          </li>
-        ))}
-      </ul>
+      <StoryModal
+        open={Boolean(memory)}
+        title={memory ? `${text.memoryTitle}` : text.memoryTitle}
+        hint={memory ? `${memory.title} · ${text.memoryHint}` : text.memoryHint}
+        cancelLabel={text.cancel}
+        confirmLabel={text.yes}
+        onCancel={() => setMemory(null)}
+        onConfirm={() => setMemory(null)}
+      />
     </section>
   );
 }

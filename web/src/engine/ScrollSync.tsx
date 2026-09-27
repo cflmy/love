@@ -21,12 +21,8 @@ function trackForChapter(id: string, local: number): TrackId | null {
   switch (id) {
     case "opening":
       return "prologue";
-    case "prayer":
-      return "prayer";
-    case "response":
-      return "response";
     case "meeting":
-      return local < 0.48 ? "butterfly" : "magpieBridge";
+      return local < 0.45 ? "butterfly" : "magpieBridge";
     case "past":
       if (local < 0.32) return "past";
       if (local < 0.66) return "changfeng";

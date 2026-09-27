@@ -1,0 +1,40 @@
+---
+description: Every code change must ship a written change record under changes/
+alwaysApply: true
+---
+
+# QDQC · Change Records
+
+## Absolute
+
+After **every** substantive edit in a session (UI, engine, assets sync, rules, config), write a change file before finishing. Do not skip because the change is “small.”
+
+## Where
+
+- Directory: `changes/`
+- Filename: `YYYY-MM-DD-short-slug.md` (UTC+8 calendar date; kebab-case slug)
+- One file per logical change batch (same user request / same PR intent). Append a new file; do not rewrite old ones unless correcting factual errors.
+
+## Required sections
+
+```markdown
+# <short title>
+
+- **Date**: YYYY-MM-DD
+- **Scope**: UI | Engine | Assets | Rules | Config | Docs
+- **Summary**: 1–2 sentences on why
+
+## Changed
+- path — what / why
+
+## Notes
+- follow-ups, risks, or “none”
+```
+
+## When finishing a task
+
+1. Implement the requested work.
+2. Create or update the matching `changes/*.md` for that batch.
+3. Mention the change-file path briefly in the reply to the user.
+
+Trivial typos-only fixes may use a single-line `## Changed` list, but the file is still required.

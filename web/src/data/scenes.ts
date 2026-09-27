@@ -9,43 +9,13 @@ export type SceneBeat = {
   images?: string[];
 };
 
-/** Inter-act visual beats — each uses a real cropped still. */
-export const prayerScenes: SceneBeat[] = [
-  {
-    id: "prayer-banner",
-    image: crops.storyBanner,
-    caption: "我们一起祈祷",
-    line: "Que dure, que câlin.",
-    layout: "full",
-  },
-  {
-    id: "prayer-pair",
-    image: crops.posterHer,
-    caption: "愿天长地久",
-    line: "愿紧紧相拥",
-    layout: "pair",
-    images: [crops.posterHer, crops.posterHim],
-  },
-];
+/**
+ * Shot beats for the scroll film · order mirrors docs/008.md acts.
+ * Prayer / response / film-strip albums are intentionally absent —
+ * Quiet Days copy & tea stills live only in QuietDaysChapter (Act 15).
+ */
 
-export const responseScenes: SceneBeat[] = [
-  {
-    id: "response-tea",
-    image: crops.storyQuietTea,
-    caption: "时间的回应",
-    line: "Quiet days, quiet cuddles.",
-    layout: "full",
-  },
-  {
-    id: "response-days",
-    image: crops.dayDaily,
-    caption: "陪伴的日子安宁",
-    line: "坚定的拥抱无声",
-    layout: "pair",
-    images: [crops.daySight, crops.dayDaily],
-  },
-];
-
+/** Act 03 · 相逢鹊渡 — after Opening ritual */
 export const meetingScenes: SceneBeat[] = [
   {
     id: "meet-she",
@@ -89,6 +59,7 @@ export const meetingScenes: SceneBeat[] = [
   },
 ];
 
+/** Acts 05–07 · 前世：暮云 → 长风 → 许诺 */
 export const pastScenes: SceneBeat[] = [
   {
     id: "past-muyun",
@@ -107,24 +78,14 @@ export const pastScenes: SceneBeat[] = [
   {
     id: "past-four",
     image: crops.pastMeet,
-    caption: "前世四景",
+    caption: "长风恋暮云",
+    line: "这是我们曾经的许诺。",
     layout: "grid",
     images: [crops.pastMeet, crops.pastTravel, crops.pastHold, crops.pastSeas],
   },
-  {
-    id: "myth-arc",
-    image: crops.mythParting,
-    caption: "仙侠侧记",
-    layout: "grid",
-    images: [
-      crops.mythParting,
-      crops.mythWaiting,
-      crops.mythRoad,
-      crops.mythPhoenix,
-    ],
-  },
 ];
 
+/** Act 09 · 今世 — human scale; Quiet Days chapter comes later */
 export const presentScenes: SceneBeat[] = [
   {
     id: "life-meet",
@@ -144,11 +105,13 @@ export const presentScenes: SceneBeat[] = [
     id: "life-three",
     image: crops.lifeRoad,
     caption: "人间三事",
+    line: "Quiet days… 再往后，才是真正的安静。",
     layout: "triptych",
     images: [crops.lifeRoad, crops.lifeLuck, crops.lifeFuture],
   },
 ];
 
+/** Act 10 lead-in · 山高路远 */
 export const journeyLeadIn: SceneBeat[] = [
   {
     id: "road-wait",
@@ -174,6 +137,7 @@ export const journeyLeadIn: SceneBeat[] = [
   },
 ];
 
+/** Acts 11–13 outro · 金光 / 锁链 / 相拥 */
 export const journeyOutro: SceneBeat[] = [
   {
     id: "road-hold",
@@ -202,15 +166,4 @@ export const journeyOutro: SceneBeat[] = [
     line: "平安喜乐。",
     layout: "full",
   },
-];
-
-export const storyStrip = [
-  crops.story1,
-  crops.story2,
-  crops.story3,
-  crops.story4,
-  crops.story5,
-  crops.story6,
-  crops.story7,
-  crops.story8,
 ];

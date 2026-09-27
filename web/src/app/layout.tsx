@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Noto_Serif_SC } from "next/font/google";
+import { StoryChrome } from "@/components/ui/StoryChrome";
 import "./globals.css";
 
 const display = Cormorant_Garamond({
@@ -64,7 +65,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`${display.variable} ${chinese.variable} antialiased`}>
-        {children}
+        <StoryChrome>{children}</StoryChrome>
       </body>
     </html>
   );

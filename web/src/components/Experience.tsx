@@ -7,8 +7,6 @@ import { StoryChapters } from "@/components/story/StoryChapters";
 import { EraFlash } from "@/components/story/EraFlash";
 import { JourneySubtitles } from "@/components/story/JourneySubtitles";
 import { MeetingTitle } from "@/components/story/MeetingTitle";
-import { ChapterNav } from "@/components/ui/ChapterNav";
-import { MusicToggle } from "@/components/ui/MusicToggle";
 import { AtmosphereField } from "@/components/ui/AtmosphereField";
 import { ScrollSync } from "@/engine/ScrollSync";
 import { BootProvider } from "@/components/BootProvider";
@@ -23,8 +21,6 @@ export function Experience() {
             <WorldCanvas />
             <OpeningGate />
             <AtmosphereField />
-            <ChapterNav />
-            <MusicToggle />
             <ScrollSync>
               <StoryChapters />
             </ScrollSync>

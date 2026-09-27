@@ -56,7 +56,7 @@ export function CardExperience({ initialFace = "front" }: { initialFace?: "front
         <div className="card-page__idle">
           <p className="card-page__whisper">A touch</p>
           <p className="card-page__whisper">awakens our world.</p>
-          <ArtButton variant="start" label="触碰这张卡" width={280} onClick={awaken} />
+          <ArtButton variant="start" label="触碰这张卡" hint="Awaken" width={260} onClick={awaken} />
         </div>
       )}
 
@@ -103,7 +103,7 @@ export function CardExperience({ initialFace = "front" }: { initialFace?: "front
         <div className="card-page__reveal">
           <p>You found the other side.</p>
           <p className="zh">另一半的故事，正在等待你。</p>
-          <ArtButton variant="memory" label="进入我们的世界" width={300} onClick={enterStory} />
+          <ArtButton variant="memory" label="进入我们的世界" hint="Enter our world" width={280} onClick={enterStory} />
         </div>
       )}
 

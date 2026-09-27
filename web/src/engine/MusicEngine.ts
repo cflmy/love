@@ -82,6 +82,36 @@ class MusicEngineImpl {
     howl.volume(v);
   }
 
+  currentId() {
+    return this.current;
+  }
+
+  masterVolume() {
+    return this.master;
+  }
+
+  isEnabled() {
+    return this.enabled;
+  }
+
+  position() {
+    const howl = this.current ? this.tracks.get(this.current) : null;
+    if (!howl) return { seek: 0, duration: 0 };
+    const seek = howl.seek();
+    return {
+      seek: typeof seek === "number" ? seek : 0,
+      duration: howl.duration() || 0,
+    };
+  }
+
+  seekTo(ratio: number) {
+    const howl = this.current ? this.tracks.get(this.current) : null;
+    if (!howl) return;
+    const duration = howl.duration();
+    if (!duration) return;
+    howl.seek(Math.max(0, Math.min(1, ratio)) * duration);
+  }
+
   stopAll(fadeMs = 600) {
     this.tracks.forEach((h) => {
       h.fade(h.volume(), 0, fadeMs);
