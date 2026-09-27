@@ -24,8 +24,8 @@ export function MeetingChapter() {
   const local = useMeetingLocal();
   const reduced = useStoryStore((s) => s.reducedMotion);
   const inAct = local > 0.01 && local < 0.995;
-  // Silence before title — captions clear by ~0.86
-  const captionGate = local < 0.86 ? 1 : Math.max(0, 1 - (local - 0.86) / 0.04);
+  // Silence before title coda — captions clear by ~0.76
+  const captionGate = local < 0.76 ? 1 : Math.max(0, 1 - (local - 0.76) / 0.04);
   const hintOpacity = reduced
     ? local < 0.12
       ? 0.5

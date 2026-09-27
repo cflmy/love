@@ -128,8 +128,10 @@ export const crops = mediaMap({
   story3: "/media/crops/story-3.webp",
   story4: "/media/crops/story-4.webp",
   story5: "/media/crops/story-5.webp",
-  story6: "/media/crops/story-6.webp",
-  story7: "/media/crops/story-7.webp",
+  /** File story-7.webp carries corner mark 6「奔向彼此」 */
+  story6: "/media/crops/story-7.webp",
+  /** File story-6.webp carries corner mark 7「终会相见」 */
+  story7: "/media/crops/story-6.webp",
   story8: "/media/crops/story-8.webp",
   storyBanner: "/media/crops/story-banner.webp",
   storyQuietTea: "/media/crops/story-quiet-tea.webp",

@@ -47,7 +47,8 @@ export const chapters: Chapter[] = [
     title: "相逢鹊渡",
     subtitle: "The Magpie Bridge",
     navLabel: "01 相逢",
-    scrollSpan: 6.4,
+    /** Title coda dwells inside this span; must not steal 前世 time */
+    scrollSpan: 7.4,
     themeTrack: "butterfly",
     color: "#4E83B5",
     copy: [
@@ -63,7 +64,7 @@ export const chapters: Chapter[] = [
     title: "前世",
     subtitle: "长风恋暮云",
     navLabel: "02 前世",
-    scrollSpan: 5.4,
+    scrollSpan: 7.4,
     themeTrack: "past",
     color: "#172B49",
     copy: [
@@ -78,7 +79,8 @@ export const chapters: Chapter[] = [
     title: "今世",
     subtitle: "祥云聚顶 · 鸿运当头",
     navLabel: "03 今世",
-    scrollSpan: 3.8,
+    /** Longer span so each still can finish a TL→BR scan */
+    scrollSpan: 5.2,
     themeTrack: "present",
     color: "#C7A66A",
     copy: [

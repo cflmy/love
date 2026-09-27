@@ -2,38 +2,91 @@
 
 import { useMemo } from "react";
 import { chapterProgressBounds } from "@/data/chapters";
-import { MEETING_TITLE, smoothstep } from "@/data/meetingShots";
+import { MEETING_TITLE, holdThenExit, smoothstep } from "@/data/meetingShots";
 import { useStoryStore } from "@/store/story";
 
 /**
- * Fixed overlay during 相逢鹊渡 — blur → focus only after meeting (STORY_FLOW G1).
+ * Fixed overlay during 相逢鹊渡 — rise → hold → exit *inside* meeting.
+ * Only a breath of residue into 前世; never covers 暮云 entrance.
  */
 export function MeetingTitle() {
   const progress = useStoryStore((s) => s.progress);
   const chapterId = useStoryStore((s) => s.chapterId);
   const reduced = useStoryStore((s) => s.reducedMotion);
 
-  const local = useMemo(() => {
+  const { meetLocal, pastLocal } = useMemo(() => {
     const bounds = chapterProgressBounds();
-    const b = bounds.find((x) => x.id === "meeting");
-    if (!b) return 0;
-    return Math.min(1, Math.max(0, (progress - b.start) / Math.max(0.0001, b.end - b.start)));
+    const meet = bounds.find((x) => x.id === "meeting");
+    const past = bounds.find((x) => x.id === "past");
+    const meetLocal = meet
+      ? Math.min(1, Math.max(0, (progress - meet.start) / Math.max(0.0001, meet.end - meet.start)))
+      : 0;
+    const pastLocal = past
+      ? Math.min(1, Math.max(0, (progress - past.start) / Math.max(0.0001, past.end - past.start)))
+      : 0;
+    return { meetLocal, pastLocal };
   }, [progress]);
 
-  if (chapterId !== "meeting") return null;
+  const inMeeting = chapterId === "meeting";
+  const inPastCarry = chapterId === "past" && pastLocal < MEETING_TITLE.pastCarry;
+  if (!inMeeting && !inPastCarry) return null;
 
-  const gate = smoothstep(local, MEETING_TITLE.gate.start, MEETING_TITLE.gate.end);
-  const lineA = smoothstep(local, MEETING_TITLE.lineA.start, MEETING_TITLE.lineA.end);
-  const lineB = smoothstep(local, MEETING_TITLE.lineB.start, MEETING_TITLE.lineB.end);
-  const lineC = smoothstep(local, MEETING_TITLE.lineC.start, MEETING_TITLE.lineC.end);
+  const exit = MEETING_TITLE.exitStart;
+  const exitEnd = MEETING_TITLE.exitEnd;
+
+  const lineA = holdThenExit(
+    meetLocal,
+    MEETING_TITLE.lineA.start,
+    MEETING_TITLE.lineA.peak,
+    exit,
+    exitEnd,
+  );
+  const lineB = holdThenExit(
+    meetLocal,
+    MEETING_TITLE.lineB.start,
+    MEETING_TITLE.lineB.peak,
+    exit,
+    exitEnd,
+  );
+  const lineC = holdThenExit(
+    meetLocal,
+    MEETING_TITLE.lineC.start,
+    MEETING_TITLE.lineC.peak,
+    exit,
+    exitEnd,
+  );
+
+  const gateInMeeting = holdThenExit(
+    meetLocal,
+    MEETING_TITLE.gate.start,
+    MEETING_TITLE.gate.peak,
+    exit,
+    exitEnd,
+  );
+  // Past residue: fade + lift only — no new beat, clears before 暮云 reads
+  const pastFade = inPastCarry ? 1 - smoothstep(pastLocal, 0, MEETING_TITLE.pastCarry) : 0;
+  const gate = inMeeting ? gateInMeeting : pastFade * 0.35;
 
   if (gate < 0.02) return null;
 
   const blur = (t: number) => (reduced ? 0 : (1 - t) * 14);
   const y = (t: number) => (1 - t) * 18;
+  // Soft lift while exiting so 暮云 (center) isn't covered during the breath of overlap
+  const exitLift = inMeeting
+    ? smoothstep(meetLocal, exit, exitEnd) * -12
+    : inPastCarry
+      ? -18 - pastLocal * 24
+      : 0;
 
   return (
-    <div className="meeting-title" aria-live="polite" style={{ opacity: gate }}>
+    <div
+      className="meeting-title"
+      aria-live="polite"
+      style={{
+        opacity: gate,
+        transform: `translate(-50%, calc(-50% + ${exitLift}vh))`,
+      }}
+    >
       <p
         className="meeting-title__line a"
         style={{

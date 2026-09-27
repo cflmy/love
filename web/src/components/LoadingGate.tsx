@@ -27,6 +27,7 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
       crops.nfcFront,
       crops.heroDesktop,
       crops.bridgeNight,
+      crops.meetShe,
       crops.meetBridge,
       brand.icon,
     ];

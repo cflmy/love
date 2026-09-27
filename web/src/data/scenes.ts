@@ -59,7 +59,7 @@ export const meetingScenes: SceneBeat[] = [
   },
 ];
 
-/** Acts 05–07 · 前世：暮云 → 长风 → 许诺 */
+/** Acts 05–07 · 前世：暮云 → 长风 → 初遇 → 同游 → 相守 → 山海 */
 export const pastScenes: SceneBeat[] = [
   {
     id: "past-muyun",
@@ -76,16 +76,37 @@ export const pastScenes: SceneBeat[] = [
     layout: "full",
   },
   {
-    id: "past-four",
+    id: "past-first",
+    image: crops.pastTravel,
+    caption: "初遇",
+    line: "云起于东，风来于西，一眼万年。",
+    layout: "full",
+  },
+  {
+    id: "past-together",
     image: crops.pastMeet,
-    caption: "长风恋暮云",
+    caption: "同游",
+    line: "凤舞九天，鹏游四海，与你并肩。",
+    layout: "full",
+  },
+  {
+    id: "past-hold",
+    image: crops.pastHold,
+    caption: "相守",
+    line: "此心不改，山海可证。",
+    layout: "full",
+  },
+  {
+    id: "past-seas",
+    image: crops.pastSeas,
+    caption: "山海",
     line: "这是我们曾经的许诺。",
     layout: "grid",
-    images: [crops.pastMeet, crops.pastTravel, crops.pastHold, crops.pastSeas],
+    images: [crops.pastTravel, crops.pastMeet, crops.pastHold, crops.pastSeas],
   },
 ];
 
-/** Act 09 · 今世 — human scale; Quiet Days chapter comes later */
+/** Act 09 · 今世 — human scale; plates follow corner marks 1→4 */
 export const presentScenes: SceneBeat[] = [
   {
     id: "life-meet",
@@ -102,12 +123,19 @@ export const presentScenes: SceneBeat[] = [
     layout: "full",
   },
   {
-    id: "life-three",
+    id: "life-road",
     image: crops.lifeRoad,
-    caption: "人间三事",
-    line: "Quiet days… 再往后，才是真正的安静。",
-    layout: "triptych",
-    images: [crops.lifeRoad, crops.lifeLuck, crops.lifeFuture],
+    caption: "山高路远",
+    line: "山高路远，也要一起走。",
+    layout: "full",
+  },
+  {
+    id: "life-seal",
+    image: crops.lifeLuck,
+    caption: "祥云聚顶",
+    line: "祥云聚顶，鸿运当头。",
+    layout: "pair",
+    images: [crops.lifeLuck, crops.lifeFuture],
   },
 ];
 

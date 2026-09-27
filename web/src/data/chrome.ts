@@ -244,7 +244,7 @@ export type NavItem = {
 
 /** Nav order = film spine after Opening (docs/008). */
 export const NAV_ITEMS: NavItem[] = [
-  { id: "meeting", icon: "butterfly", image: crops.meetBridge, key: "meeting" },
+  { id: "meeting", icon: "butterfly", image: crops.meetShe, key: "meeting" },
   { id: "past", icon: "phoenix", image: crops.pastMuyun, key: "past" },
   { id: "present", icon: "city", image: crops.lifeMeet, key: "present" },
   { id: "journey", icon: "mountain", image: crops.roadClimb, key: "journey" },

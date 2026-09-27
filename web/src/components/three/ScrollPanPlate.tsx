@@ -18,9 +18,13 @@ function textureAspect(url: string, texture: THREE.Texture) {
   return 16 / 9;
 }
 
+export type RevealMode = "cover" | "fitGrow" | "scan";
+
 /**
  * Full-bleed backdrop that keeps intrinsic aspect (no stretch).
- * Oversized to cover the frustum, then pans on scroll so the whole plate can be read.
+ * - cover: oversized cover + optional axis pan
+ * - fitGrow: start contain (full art readable) → grow into cover while scanning
+ * - scan: cover with forced L→R / T→B ken-burns scan
  */
 export function ScrollPanPlate({
   url,
@@ -28,9 +32,10 @@ export function ScrollPanPlate({
   z = -12,
   y = 0,
   opacity = 1,
-  /** >1 leaves travel room beyond cover */
+  /** >1 leaves travel room beyond cover (used by cover/scan) */
   cover = 1.22,
   panAxis = "auto",
+  reveal = "cover",
   damp = 2.8,
   color,
   depthWrite = false,
@@ -42,6 +47,7 @@ export function ScrollPanPlate({
   opacity?: number;
   cover?: number;
   panAxis?: "auto" | "x" | "y" | "both";
+  reveal?: RevealMode;
   damp?: number;
   color?: string;
   depthWrite?: boolean;
@@ -54,6 +60,7 @@ export function ScrollPanPlate({
 
   const aspect = textureAspect(url, texture);
   const smoothed = useRef(new THREE.Vector3(0, y, z));
+  const scaleSmoothed = useRef(1);
 
   useFrame((_, dt) => {
     if (!mesh.current) return;
@@ -62,34 +69,69 @@ export function ScrollPanPlate({
     const visibleH = 2 * Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2) * dist;
     const visibleW = visibleH * (size.width / Math.max(1, size.height));
     const viewAspect = visibleW / visibleH;
-
-    let planeH: number;
-    let planeW: number;
-    if (aspect >= viewAspect) {
-      planeH = visibleH * cover;
-      planeW = planeH * aspect;
-    } else {
-      planeW = visibleW * cover;
-      planeH = planeW / aspect;
-    }
-    mesh.current.scale.set(planeW, planeH, 1);
-
-    const overflowX = Math.max(0, planeW - visibleW);
-    const overflowY = Math.max(0, planeH - visibleH);
     const t = THREE.MathUtils.clamp(progress, 0, 1);
-    let axis = panAxis;
-    if (axis === "auto") axis = overflowX >= overflowY * 0.85 ? "x" : "y";
 
+    // Cover size (fills frustum * cover factor)
+    let coverH: number;
+    let coverW: number;
+    if (aspect >= viewAspect) {
+      coverH = visibleH * cover;
+      coverW = coverH * aspect;
+    } else {
+      coverW = visibleW * cover;
+      coverH = coverW / aspect;
+    }
+
+    // Contain size (entire image visible inside frustum)
+    let fitH: number;
+    let fitW: number;
+    if (aspect >= viewAspect) {
+      fitW = visibleW * 0.92;
+      fitH = fitW / aspect;
+    } else {
+      fitH = visibleH * 0.88;
+      fitW = fitH * aspect;
+    }
+
+    let planeW = coverW;
+    let planeH = coverH;
     let tx = 0;
     let ty = y;
-    if (axis === "x" || axis === "both") {
+
+    if (reveal === "fitGrow") {
+      const grow = THREE.MathUtils.smoothstep(t, 0, 0.42);
+      const scan = THREE.MathUtils.smoothstep(t, 0.38, 1);
+      planeW = THREE.MathUtils.lerp(fitW, coverW * 1.08, grow);
+      planeH = THREE.MathUtils.lerp(fitH, coverH * 1.08, grow);
+      const overflowX = Math.max(0, planeW - visibleW);
+      const overflowY = Math.max(0, planeH - visibleH);
+      // Start reading top-left text, then scan to bottom-right
+      tx = THREE.MathUtils.lerp(overflowX * 0.42, -overflowX * 0.48, scan);
+      ty = y + THREE.MathUtils.lerp(overflowY * 0.4, -overflowY * 0.42, scan);
+    } else if (reveal === "scan") {
+      planeW = coverW * 1.12;
+      planeH = coverH * 1.12;
+      const overflowX = Math.max(0, planeW - visibleW);
+      const overflowY = Math.max(0, planeH - visibleH);
       tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, t);
+      ty = y + THREE.MathUtils.lerp(overflowY * 0.5, -overflowY * 0.5, t);
+    } else {
+      const overflowX = Math.max(0, planeW - visibleW);
+      const overflowY = Math.max(0, planeH - visibleH);
+      let axis = panAxis;
+      if (axis === "auto") axis = overflowX >= overflowY * 0.85 ? "x" : "y";
+      if (axis === "x" || axis === "both") {
+        tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, t);
+      }
+      if (axis === "y" || axis === "both") {
+        ty = y + THREE.MathUtils.lerp(overflowY * 0.42, -overflowY * 0.42, t);
+      } else if (axis === "x" && overflowY > 0) {
+        ty = y + THREE.MathUtils.lerp(overflowY * 0.1, -overflowY * 0.06, t);
+      }
     }
-    if (axis === "y" || axis === "both") {
-      ty = y + THREE.MathUtils.lerp(overflowY * 0.42, -overflowY * 0.42, t);
-    } else if (axis === "x" && overflowY > 0) {
-      ty = y + THREE.MathUtils.lerp(overflowY * 0.1, -overflowY * 0.06, t);
-    }
+
+    scaleSmoothed.current = THREE.MathUtils.damp(scaleSmoothed.current, 1, damp, dt);
+    mesh.current.scale.set(planeW * scaleSmoothed.current, planeH * scaleSmoothed.current, 1);
 
     smoothed.current.x = THREE.MathUtils.damp(smoothed.current.x, tx, damp, dt);
     smoothed.current.y = THREE.MathUtils.damp(smoothed.current.y, ty, damp, dt);
@@ -165,6 +207,193 @@ export function SubjectBillboard({
 
   return (
     <mesh ref={mesh} position={position} scale={[width, height, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        opacity={opacity}
+        depthWrite={false}
+        side={side}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+export type PanelPose = {
+  x: number;
+  y: number;
+  z: number;
+  rotZ?: number;
+  scale?: number;
+};
+
+/**
+ * Far L|R door leaf — 外突内凹 (outer edges toward camera, seam recessed).
+ * Large enough to cover the void; intrinsic aspect (no stretch).
+ */
+export function DoorPanel({
+  url,
+  side,
+  progress,
+  opacity = 1,
+  z = -12,
+  /** 0→1 deepens the 外突内凹 yaw */
+  open = 0,
+  damp = 2.4,
+}: {
+  url: string;
+  side: "left" | "right";
+  progress: number;
+  opacity?: number;
+  z?: number;
+  open?: number;
+  damp?: number;
+}) {
+  const mesh = useRef<THREE.Mesh>(null);
+  const { camera, size } = useThree();
+  const texture = useTexture(url);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+  const aspect = textureAspect(url, texture);
+  const pos = useRef(new THREE.Vector3());
+  const rotY = useRef(0);
+
+  useFrame((_, dt) => {
+    if (!mesh.current) return;
+    const persp = camera as THREE.PerspectiveCamera;
+    const dist = Math.max(0.35, Math.abs(camera.position.z - z));
+    const visibleH = 2 * Math.tan(THREE.MathUtils.degToRad(persp.fov) / 2) * dist;
+    const visibleW = visibleH * (size.width / Math.max(1, size.height));
+    const t = THREE.MathUtils.clamp(progress, 0, 1);
+    const o = THREE.MathUtils.clamp(open, 0, 1);
+
+    // Half-door bay — cover void, modest center overlap (not a heavy cross)
+    const maxW = visibleW * 0.58;
+    const maxH = visibleH * 1.2;
+    let planeH = maxH;
+    let planeW = planeH * aspect;
+    if (planeW < maxW) {
+      // Prefer filling width of the door bay when art is wide enough
+      planeW = maxW;
+      planeH = planeW / aspect;
+      if (planeH < maxH) {
+        planeH = maxH;
+        planeW = planeH * aspect;
+      }
+    }
+    mesh.current.scale.set(planeW, planeH, 1);
+
+    const sign = side === "left" ? -1 : 1;
+    // Pivot near center seam: outer edge comes forward (外突), inner goes back (内凹)
+    const baseX = sign * (visibleW * 0.3);
+    const baseZ = z + o * 0.35; // slight overall approach while opening
+    // Left: negative yaw → outer (-X) toward +camera in R3F (camera looks -Z... wait)
+    // R3F: camera looks down -Z; +Z is toward camera from scene origin behind.
+    // Mesh facing camera is at negative Z. rotateY: left leaf wants outer edge closer to camera
+    // = larger z (less negative) on the outer side.
+    // Left leaf at -X: rotateY(+θ) lifts -X side toward +Z? 
+    // RHR: rotateY(+): x' = x cos z + z sin... For point at local -x (outer on left panel if pivot center-right):
+    // Hinge at inner: left panel pivot near its right. We position mesh center left of seam.
+    // yaw = -sign * angle → left gets +angle, right gets -angle for 外突内凹
+    const yaw = -sign * (0.28 + o * 0.22); // ~16°–29°, outer forward
+    const panY = THREE.MathUtils.lerp(planeH * 0.01, -planeH * 0.03, t);
+
+    pos.current.x = THREE.MathUtils.damp(pos.current.x, baseX, damp, dt);
+    pos.current.y = THREE.MathUtils.damp(pos.current.y, panY, damp, dt);
+    pos.current.z = THREE.MathUtils.damp(pos.current.z, baseZ, damp, dt);
+    rotY.current = THREE.MathUtils.damp(rotY.current, yaw, damp, dt);
+
+    mesh.current.position.copy(pos.current);
+    mesh.current.rotation.set(0, rotY.current, 0);
+    const mat = mesh.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = opacity;
+    mesh.current.visible = opacity > 0.015;
+  });
+
+  return (
+    <mesh ref={mesh} position={[side === "left" ? -2 : 2, 0, z]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial
+        map={texture}
+        transparent
+        opacity={opacity}
+        depthWrite={false}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+/**
+ * Story still with spatial enter → settle → exit (not opacity-only fades).
+ * `settle` / `exit` are 0→1 amounts driven by chapter local progress.
+ */
+export function CinematicPanel({
+  url,
+  height = 3.2,
+  opacity = 1,
+  settle = 1,
+  exit = 0,
+  from,
+  home,
+  away,
+  damp = 4.2,
+  side = THREE.DoubleSide,
+}: {
+  url: string;
+  height?: number;
+  opacity?: number;
+  settle?: number;
+  exit?: number;
+  from: PanelPose;
+  home: PanelPose;
+  away: PanelPose;
+  damp?: number;
+  side?: THREE.Side;
+}) {
+  const mesh = useRef<THREE.Mesh>(null);
+  const texture = useTexture(url);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const aspect = textureAspect(url, texture);
+  const baseW = height * aspect;
+  const pos = useRef(new THREE.Vector3(from.x, from.y, from.z));
+  const rotZ = useRef(from.rotZ ?? 0);
+  const scl = useRef(from.scale ?? 0.82);
+
+  useFrame((_, dt) => {
+    if (!mesh.current) return;
+    const s = THREE.MathUtils.clamp(settle, 0, 1);
+    const e = THREE.MathUtils.clamp(exit, 0, 1);
+    const ix = THREE.MathUtils.lerp(from.x, home.x, s);
+    const iy = THREE.MathUtils.lerp(from.y, home.y, s);
+    const iz = THREE.MathUtils.lerp(from.z, home.z, s);
+    const ir = THREE.MathUtils.lerp(from.rotZ ?? 0, home.rotZ ?? 0, s);
+    const is = THREE.MathUtils.lerp(from.scale ?? 0.82, home.scale ?? 1, s);
+
+    const tx = THREE.MathUtils.lerp(ix, away.x, e);
+    const ty = THREE.MathUtils.lerp(iy, away.y, e);
+    const tz = THREE.MathUtils.lerp(iz, away.z, e);
+    const tr = THREE.MathUtils.lerp(ir, away.rotZ ?? 0, e);
+    const ts = THREE.MathUtils.lerp(is, away.scale ?? 0.9, e);
+
+    pos.current.x = THREE.MathUtils.damp(pos.current.x, tx, damp, dt);
+    pos.current.y = THREE.MathUtils.damp(pos.current.y, ty, damp, dt);
+    pos.current.z = THREE.MathUtils.damp(pos.current.z, tz, damp, dt);
+    rotZ.current = THREE.MathUtils.damp(rotZ.current, tr, damp, dt);
+    scl.current = THREE.MathUtils.damp(scl.current, ts, damp, dt);
+
+    mesh.current.position.copy(pos.current);
+    mesh.current.rotation.z = rotZ.current;
+    mesh.current.scale.set(baseW * scl.current, height * scl.current, 1);
+    const mat = mesh.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = opacity;
+    mesh.current.visible = opacity > 0.02;
+  });
+
+  return (
+    <mesh ref={mesh} position={[from.x, from.y, from.z]}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial
         map={texture}

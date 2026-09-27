@@ -1047,8 +1047,9 @@ body {
 .meeting-title {
   position: fixed;
   left: 50%;
-  top: 42%;
+  top: 38%;
   z-index: 28;
+  /* transform set inline for exit lift — keep 暮云 center clear */
   transform: translate(-50%, -50%);
   width: min(92vw, 560px);
   text-align: center;
@@ -1161,11 +1162,11 @@ body {
 }
 
 .film-act--past {
-  min-height: 520svh;
+  min-height: 640svh;
 }
 
 .film-act--present {
-  min-height: 380svh;
+  min-height: 520svh;
 }
 
 .film-act__sticky {
@@ -1182,7 +1183,7 @@ body {
 .film-act__plates {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
 }
 
 .film-act__plate {
@@ -1202,6 +1203,29 @@ body {
   object-position: center 40%;
 }
 
+/* Scroll-reveal stills: pan/scale driven inline; keep letterbox soft */
+.film-act__plate--reveal {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(23, 43, 73, 0.35), rgba(5, 8, 16, 0.82));
+}
+
+.film-act__img--reveal {
+  will-change: transform, object-position;
+  transform-origin: center center;
+  transition: none;
+}
+
+.film-act__plate--fitGrow .film-act__img--reveal {
+  filter: saturate(0.95) brightness(0.82);
+}
+
+.film-act--present .film-act__plate--scan .film-act__img--reveal {
+  filter: saturate(1.02) brightness(0.9);
+}
+
 .film-act__veil {
   position: absolute;
   inset: 0;
@@ -1211,7 +1235,71 @@ body {
 .film-act__veil--myth {
   background:
     radial-gradient(ellipse at 50% 20%, rgba(78, 131, 181, 0.12), transparent 50%),
-    linear-gradient(180deg, rgba(8, 10, 22, 0.35) 0%, transparent 35%, rgba(5, 8, 16, 0.75) 100%);
+    linear-gradient(180deg, rgba(8, 10, 22, 0.2) 0%, transparent 35%, rgba(5, 8, 16, 0.55) 100%);
+}
+
+/* 前世远景双开门 — 外突内凹（外侧朝前、中缝退后）；大图盖满；不拉伸 */
+.past-doors {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  perspective: 1600px;
+  perspective-origin: 50% 45%;
+  transform-style: preserve-3d;
+  background: #0a1224;
+}
+
+.past-doors__leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* ~10% center overlap — enough to cover black, not a heavy cross */
+  width: 55%;
+  display: grid;
+  place-items: stretch;
+  transform-style: preserve-3d;
+  will-change: transform;
+  filter: saturate(0.9) brightness(0.72);
+}
+
+.past-doors__leaf--left {
+  left: 0;
+  /* hinge at inner (center) → outer edge swings forward = 外突内凹 */
+  transform-origin: right center;
+}
+
+.past-doors__leaf--right {
+  right: 0;
+  transform-origin: left center;
+}
+
+.past-doors__frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-shadow:
+    0 28px 56px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(199, 166, 106, 0.16);
+  background: #121a2e;
+}
+
+.past-doors__img {
+  object-fit: cover;
+  object-position: center 38%;
+  transform: scale(1.06);
+}
+
+/* Soft center valley — reads the seam without opening a black gap */
+.past-doors__corridor {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 36% 68% at 50% 48%, rgba(5, 8, 16, 0.28) 0%, transparent 72%);
 }
 
 .film-act__veil--warm {
@@ -3166,19 +3254,87 @@ body {
   padding: 0 1rem 1rem;
 }
 
-.qd-waterfall {
+/* Continuous upward marquee waterfall — dual stacks, translateY(-50%) seamless */
+.qd-marquee {
+  --marquee-gap: 0.75rem;
   margin: 2.6rem auto 1.2rem;
-  padding: 0 1rem 1.5rem;
+  padding: 0 1rem;
   width: min(1080px, 100%);
-  columns: 3;
-  column-gap: 0.75rem;
+  height: min(78vh, 760px);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--marquee-gap);
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 10%,
+    #000 90%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 10%,
+    #000 90%,
+    transparent 100%
+  );
+}
+
+.qd-marquee__col {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.qd-marquee__track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  animation: qd-marquee-up var(--marquee-dur, 48s) linear infinite;
+}
+
+.qd-marquee__col--1 .qd-marquee__track {
+  --marquee-dur: 52s;
+  animation-duration: 52s;
+}
+
+.qd-marquee__col--2 .qd-marquee__track {
+  --marquee-dur: 64s;
+  animation-duration: 64s;
+  animation-delay: -12s;
+}
+
+.qd-marquee__col--3 .qd-marquee__track {
+  --marquee-dur: 58s;
+  animation-duration: 58s;
+  animation-delay: -20s;
+}
+
+.qd-marquee.is-paused .qd-marquee__track {
+  animation-play-state: paused;
+}
+
+.qd-marquee__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--marquee-gap);
+  padding-bottom: var(--marquee-gap);
+}
+
+@keyframes qd-marquee-up {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
 }
 
 .qd-waterfall__item {
-  break-inside: avoid;
   display: block;
   width: 100%;
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -3190,11 +3346,11 @@ body {
   box-shadow:
     0 12px 28px rgba(0, 0, 0, 0.28),
     inset 0 0 0 1px rgba(199, 166, 106, 0.22);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  transition: box-shadow 0.28s ease;
 }
 
-.qd-waterfall__item:hover {
-  transform: translateY(-3px);
+.qd-waterfall__item:hover,
+.qd-waterfall__item:focus-visible {
   box-shadow:
     0 18px 36px rgba(0, 0, 0, 0.35),
     0 0 0 1px rgba(232, 196, 122, 0.45);
@@ -3208,7 +3364,9 @@ body {
 }
 
 .qd-waterfall__item span {
-  display: block;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
   padding: 0.45rem 0.65rem 0.6rem;
   font-family: var(--font-serif-chinese), serif;
   font-size: 0.78rem;
@@ -3217,12 +3375,65 @@ body {
     linear-gradient(180deg, rgba(16, 28, 52, 0.2), rgba(6, 10, 20, 0.88));
 }
 
-.qd-waterfall__item--2 {
-  margin-top: 0.35rem;
+.qd-waterfall__mark {
+  flex: none;
+  font-style: normal;
+  font-family: var(--font-serif), "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  color: var(--pale-gold, #c7a66a);
+  opacity: 0.92;
 }
 
-.qd-waterfall__item--4 {
-  margin-top: 0.55rem;
+/* Past quartet — floating myth cards over sticky plate */
+.past-quartet {
+  position: absolute;
+  inset: 12% 4% 22%;
+  z-index: 1;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.65rem;
+  place-items: center;
+}
+
+.past-quartet__card {
+  margin: 0;
+  width: min(42vw, 168px);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(199, 166, 106, 0.35);
+  background: rgba(8, 12, 24, 0.35);
+}
+
+.past-quartet__card .frame-img,
+.past-quartet__card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.past-quartet__card--1 {
+  justify-self: end;
+  align-self: end;
+}
+
+.past-quartet__card--2 {
+  justify-self: start;
+  align-self: end;
+}
+
+.past-quartet__card--3 {
+  justify-self: end;
+  align-self: start;
+}
+
+.past-quartet__card--4 {
+  justify-self: start;
+  align-self: start;
 }
 
 .qd-polaroid {
@@ -3424,15 +3635,19 @@ body {
     gap: 0.35rem;
   }
 
-  .qd-waterfall {
-    columns: 2;
-    column-gap: 0.55rem;
-    padding: 0 0.75rem 1.2rem;
+  .qd-marquee {
+    grid-template-columns: repeat(2, 1fr);
+    height: min(70vh, 640px);
+    padding: 0 0.75rem;
+    gap: 0.55rem;
   }
 
   .qd-waterfall__item {
-    margin-bottom: 0.55rem;
     border-radius: 0.7rem;
+  }
+
+  .past-quartet__card {
+    width: min(38vw, 132px);
   }
 }
 
@@ -3446,9 +3661,25 @@ body {
   .page-fade,
   .qd-player__disc img,
   .qd-player-layer,
-  .qd-player {
+  .qd-player,
+  .qd-marquee__track {
     transition: none;
     animation: none;
+  }
+
+  .qd-marquee {
+    height: auto;
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .qd-marquee__track {
+    transform: none;
+  }
+
+  .qd-marquee__stack[aria-hidden="true"] {
+    display: none;
   }
 
   .qd-btn:hover:not(:disabled) .qd-btn__sheen {
