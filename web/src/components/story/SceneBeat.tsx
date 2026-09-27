@@ -1,8 +1,6 @@
 "use client";
 
-import Image from "next/image";
 import type { SceneBeat } from "@/data/scenes";
-import { parts } from "@/data/assets";
 import { FrameImage } from "@/components/ui/FrameImage";
 
 export function SceneBeatView({
@@ -14,8 +12,6 @@ export function SceneBeatView({
 }) {
   const imgs = beat.images?.length ? beat.images : [beat.image];
   const layout = beat.layout ?? "full";
-  const showSprite =
-    layout === "full" && (beat.id.includes("meet") || beat.id.includes("past") || beat.id.includes("road"));
 
   return (
     <section className={`scene-beat scene-beat--${layout} scene-beat--${tone}`}>
@@ -34,17 +30,6 @@ export function SceneBeatView({
             />
           </figure>
         ))}
-        {showSprite && layout === "full" ? (
-          <div className="scene-beat__ornament" aria-hidden>
-            <Image
-              src={beat.id.includes("he") || beat.id.includes("road") ? parts.magpieSide : parts.butterflySide}
-              alt=""
-              width={160}
-              height={120}
-              className="scene-beat__ornament-img"
-            />
-          </div>
-        ) : null}
       </div>
       <div className="scene-beat__copy">
         <p className="scene-beat__caption">{beat.caption}</p>

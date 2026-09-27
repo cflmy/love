@@ -292,13 +292,13 @@ body {
   object-position: center !important;
 }
 
-.opening-butterfly {
+.opening-mote {
   position: absolute;
   left: 50%;
   top: 38%;
-  width: 180px;
-  height: 120px;
-  margin-left: -90px;
+  width: 64px;
+  height: 64px;
+  margin-left: -32px;
   opacity: 0;
   pointer-events: none;
   z-index: 5;
@@ -306,10 +306,10 @@ body {
   place-items: center;
 }
 
-.opening-gate.phase-butterfly .opening-butterfly,
-.opening-gate.phase-portal .opening-butterfly {
+.opening-gate.phase-butterfly .opening-mote,
+.opening-gate.phase-portal .opening-mote {
   opacity: 1;
-  animation: butterfly-depart 1.6s ease-in forwards;
+  animation: mote-depart 1.6s ease-in forwards;
 }
 
 .opening-gate.phase-butterfly .nfc-card,
@@ -319,31 +319,41 @@ body {
   transition: opacity 0.8s ease, transform 1s ease;
 }
 
-.opening-butterfly__sprite {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(78, 131, 181, 0.55));
+.opening-mote__core {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f7f3e9 0%, #c7a66a 45%, transparent 70%);
+  box-shadow: 0 0 18px rgba(199, 166, 106, 0.65);
 }
 
-.opening-butterfly__trail {
+.opening-mote__halo {
   position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 2px;
-  height: 56px;
-  margin-left: -1px;
-  background: linear-gradient(to bottom, rgba(199, 166, 106, 0.7), transparent);
-  opacity: 0.7;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(78, 131, 181, 0.35) 0%, transparent 68%);
+  animation: mote-pulse 1.2s ease-in-out infinite;
 }
 
-@keyframes butterfly-depart {
+@keyframes mote-pulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes mote-depart {
   0% {
     transform: translate(0, 0) scale(1);
     opacity: 1;
   }
   100% {
-    transform: translate(48px, -180px) scale(0.4);
+    transform: translate(36px, -160px) scale(0.35);
     opacity: 0;
   }
 }
@@ -2192,7 +2202,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .nfc-card__inner,
-  .opening-butterfly,
+  .opening-mote,
   .opening-gate__portal,
   .journey-chain span,
   .journey-sun__disk,

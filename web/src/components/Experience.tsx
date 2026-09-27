@@ -7,7 +7,6 @@ import { StoryChapters } from "@/components/story/StoryChapters";
 import { EraFlash } from "@/components/story/EraFlash";
 import { JourneySubtitles } from "@/components/story/JourneySubtitles";
 import { MeetingTitle } from "@/components/story/MeetingTitle";
-import { AtmosphereField } from "@/components/ui/AtmosphereField";
 import { ScrollSync } from "@/engine/ScrollSync";
 import { BootProvider } from "@/components/BootProvider";
 import { LoadingGate } from "@/components/LoadingGate";
@@ -20,7 +19,6 @@ export function Experience() {
           <main className="relative min-h-svh overflow-x-hidden bg-[#050810] text-[#F7F3E9]">
             <WorldCanvas />
             <OpeningGate />
-            <AtmosphereField />
             <ScrollSync>
               <StoryChapters />
             </ScrollSync>

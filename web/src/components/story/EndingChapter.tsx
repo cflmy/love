@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { FrameImage } from "@/components/ui/FrameImage";
 import { ArtButton } from "@/components/ui/ArtButton";
-import { brand, crops, parts } from "@/data/assets";
+import { brand, crops } from "@/data/assets";
 
 /** G5 · Ending — return warm; More Days; ∞; no second climax. */
 export function EndingChapter() {
@@ -17,10 +17,6 @@ export function EndingChapter() {
       </figure>
       <figure className="ending-chapter__still">
         <FrameImage src={crops.storyCoda} sizes="(max-width: 768px) 92vw, 520px" />
-        <div className="ending-chapter__sprites" aria-hidden>
-          <Image src={parts.butterflyFront} alt="" width={120} height={90} />
-          <Image src={parts.magpieSpread} alt="" width={130} height={100} />
-        </div>
       </figure>
 
       <div className="ending-chapter__brand">

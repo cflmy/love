@@ -33,9 +33,9 @@ export function WorldCanvas() {
           <QDQCWorld />
           {!lite && (
             <EffectComposer multisampling={0}>
-              {/* Restraint — lamps glow, not a bloom demo */}
-              <Bloom intensity={0.22 + reveal * 0.08} luminanceThreshold={0.72} mipmapBlur />
-              <Vignette eskil={false} offset={0.28} darkness={0.62} />
+              {/* Soft vignette only — bloom kept very low so plates stay clean */}
+              <Bloom intensity={0.08 + reveal * 0.04} luminanceThreshold={0.85} mipmapBlur />
+              <Vignette eskil={false} offset={0.3} darkness={0.55} />
             </EffectComposer>
           )}
         </Suspense>

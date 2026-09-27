@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { brand, crops, parts } from "@/data/assets";
+import { brand, crops } from "@/data/assets";
 import { MusicEngine } from "@/engine/MusicEngine";
 import { useStoryStore, type OpeningPhase } from "@/store/story";
 import { ArtButton } from "@/components/ui/ArtButton";
@@ -20,7 +20,6 @@ export function OpeningGate() {
   const entrySource = useStoryStore((s) => s.entrySource);
   const visitCount = useStoryStore((s) => s.visitCount);
   const [busy, setBusy] = useState(false);
-  const [frame, setFrame] = useState(0);
   const returning = visitCount > 1;
 
   useEffect(() => {
@@ -37,14 +36,6 @@ export function OpeningGate() {
       cancelled = true;
     };
   }, [reduced, setPhase]);
-
-  useEffect(() => {
-    if (phase !== "butterfly" && phase !== "portal") return;
-    const id = setInterval(() => {
-      setFrame((f) => (f + 1) % parts.butterflyFlight.length);
-    }, reduced ? 120 : 90);
-    return () => clearInterval(id);
-  }, [phase, reduced]);
 
   const runRitual = async () => {
     if (busy || phase !== "invite") return;
@@ -133,16 +124,10 @@ export function OpeningGate() {
             </div>
           </div>
 
-          <div className="opening-butterfly" aria-hidden>
-            <Image
-              src={parts.butterflyFlight[frame]}
-              alt=""
-              width={180}
-              height={120}
-              className="opening-butterfly__sprite"
-              priority
-            />
-            <span className="opening-butterfly__trail" />
+          {/* Soft light mote instead of broken flight sprites */}
+          <div className="opening-mote" aria-hidden>
+            <span className="opening-mote__core" />
+            <span className="opening-mote__halo" />
           </div>
         </div>
 

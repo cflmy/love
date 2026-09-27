@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { brand, crops, parts } from "@/data/assets";
+import { brand, crops } from "@/data/assets";
 import { useStoryStore } from "@/store/story";
 import { BlossomMark } from "@/components/ui/icons";
 
@@ -26,9 +26,8 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
     const urls = [
       crops.nfcFront,
       crops.heroDesktop,
-      crops.bridgeFull,
+      crops.bridgeNight,
       crops.meetBridge,
-      parts.butterflyFlight[0],
       brand.icon,
     ];
     Promise.all(
