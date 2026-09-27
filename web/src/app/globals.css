@@ -96,16 +96,36 @@ body {
   pointer-events: none;
 }
 
+.opening-gate__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.opening-gate__photo {
+  object-fit: cover;
+  object-position: center 42%;
+  transform: scale(1.06);
+  filter: saturate(1.05) brightness(0.92);
+}
+
 .opening-gate__veil {
   position: absolute;
   inset: 0;
-  background: var(--wash-parchment);
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(8, 14, 28, 0.42) 0%, rgba(8, 14, 28, 0.22) 38%, rgba(5, 8, 16, 0.55) 100%),
+    radial-gradient(ellipse 70% 55% at 50% 30%, rgba(78, 131, 181, 0.18), transparent 62%);
   transition: background 1.4s ease, opacity 1.2s ease;
 }
 
+/* Early brand beat — soft moon wash over the night plate, not a flat slab */
 .opening-gate.phase-silence .opening-gate__veil,
 .opening-gate.phase-mark .opening-gate__veil {
-  background: var(--wash-parchment);
+  background:
+    linear-gradient(165deg, rgba(247, 243, 233, 0.78) 0%, rgba(232, 236, 245, 0.55) 42%, rgba(12, 22, 42, 0.45) 100%),
+    radial-gradient(ellipse 60% 50% at 50% 18%, rgba(255, 255, 255, 0.35), transparent 58%);
 }
 
 .opening-gate.phase-invite .opening-gate__veil,
@@ -113,24 +133,22 @@ body {
 .opening-gate.phase-card .opening-gate__veil,
 .opening-gate.phase-flip .opening-gate__veil {
   background:
-    radial-gradient(ellipse 70% 55% at 50% 28%, rgba(78, 131, 181, 0.42), transparent 58%),
-    radial-gradient(ellipse 55% 45% at 18% 80%, rgba(23, 43, 73, 0.85), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 88% 18%, rgba(199, 166, 106, 0.12), transparent 50%),
-    linear-gradient(180deg, #1a2f52 0%, #0c1830 45%, #050810 100%);
+    linear-gradient(180deg, rgba(6, 12, 28, 0.35) 0%, rgba(6, 12, 28, 0.18) 40%, rgba(5, 8, 16, 0.62) 100%),
+    radial-gradient(ellipse 65% 50% at 50% 28%, rgba(78, 131, 181, 0.22), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 82% 18%, rgba(199, 166, 106, 0.12), transparent 55%);
 }
 
 .opening-gate.phase-butterfly .opening-gate__veil,
 .opening-gate.phase-portal .opening-gate__veil {
   background:
-    radial-gradient(ellipse 55% 48% at 48% 36%, rgba(78, 131, 181, 0.5), transparent 55%),
-    radial-gradient(ellipse 40% 35% at 72% 62%, rgba(243, 183, 198, 0.12), transparent 50%),
-    radial-gradient(ellipse 60% 50% at 20% 85%, rgba(6, 12, 28, 0.95), transparent 55%),
-    linear-gradient(185deg, #0e1d3a 0%, #07101f 50%, #02040a 100%);
+    linear-gradient(185deg, rgba(4, 8, 18, 0.25) 0%, rgba(4, 8, 18, 0.45) 55%, rgba(2, 4, 10, 0.78) 100%),
+    radial-gradient(ellipse 55% 48% at 48% 36%, rgba(78, 131, 181, 0.28), transparent 58%);
 }
 
 .opening-gate__stars {
   position: absolute;
   inset: 0;
+  z-index: 1;
   opacity: 0;
   background-image:
     radial-gradient(1px 1px at 20% 30%, rgba(247, 243, 233, 0.7), transparent),
@@ -147,7 +165,7 @@ body {
 .opening-gate.phase-flip .opening-gate__stars,
 .opening-gate.phase-butterfly .opening-gate__stars,
 .opening-gate.phase-portal .opening-gate__stars {
-  opacity: 1;
+  opacity: 0.55;
 }
 
 .opening-gate__mark {
@@ -2207,7 +2225,8 @@ body {
   .journey-chain span,
   .journey-sun__disk,
   .quiet-days__sunshaft,
-  .story-strip__rail {
+  .story-strip__rail,
+  .loading-gate__photo {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }
@@ -2224,12 +2243,49 @@ body {
   gap: 1.25rem;
   background: #050810;
   transition: opacity 0.8s ease, visibility 0.8s ease;
+  overflow: hidden;
 }
 
 .loading-gate.is-done {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+.loading-gate__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.loading-gate__photo {
+  object-fit: cover;
+  object-position: center 40%;
+  transform: scale(1.08);
+  animation: loading-bg-drift 18s ease-in-out infinite alternate;
+}
+
+.loading-gate__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 10, 22, 0.48) 0%, rgba(5, 10, 22, 0.28) 42%, rgba(5, 8, 16, 0.72) 100%),
+    radial-gradient(ellipse 70% 55% at 50% 35%, rgba(78, 131, 181, 0.2), transparent 62%),
+    radial-gradient(ellipse 50% 40% at 78% 18%, rgba(199, 166, 106, 0.14), transparent 55%);
+}
+
+@keyframes loading-bg-drift {
+  from {
+    transform: scale(1.08) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.12) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+
+.loading-gate > :not(.loading-gate__bg) {
+  position: relative;
+  z-index: 1;
 }
 
 .loading-gate__mark {
@@ -2240,6 +2296,7 @@ body {
   font-family: var(--font-serif-display), serif;
   letter-spacing: 0.4em;
   color: var(--pale-gold);
+  text-shadow: 0 2px 24px rgba(5, 8, 16, 0.55);
 }
 
 .loading-gate__inf {
@@ -2266,7 +2323,8 @@ body {
   margin: 0;
   font-size: 0.75rem;
   letter-spacing: 0.28em;
-  color: color-mix(in oklab, var(--moon-white) 55%, transparent);
+  color: color-mix(in oklab, var(--moon-white) 78%, transparent);
+  text-shadow: 0 2px 16px rgba(5, 8, 16, 0.65);
 }
 
 .card-page {
@@ -3240,6 +3298,7 @@ body {
   display: grid;
   justify-items: center;
   gap: 0.85rem;
+  text-shadow: 0 2px 18px rgba(5, 8, 16, 0.7);
 }
 
 .qd-load__stages {

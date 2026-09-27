@@ -83,6 +83,16 @@ export function OpeningGate() {
       ].join(" ")}
       data-phase={phase}
     >
+      <div className="opening-gate__bg" aria-hidden>
+        <Image
+          src={crops.bridgeNight}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="opening-gate__photo"
+        />
+      </div>
       <div className="opening-gate__veil" />
       <div className="opening-gate__stars" aria-hidden />
 

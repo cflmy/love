@@ -57,6 +57,18 @@ export function LoadingGate({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className={`loading-gate ${fade ? "is-done" : ""}`} aria-hidden={fade}>
+        <div className="loading-gate__bg" aria-hidden>
+          <Image
+            src={crops.bridgeNight}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="loading-gate__photo"
+          />
+          <div className="loading-gate__shade" />
+        </div>
+
         <div className="loading-gate__mark">
           <Image src={brand.icon} alt="" width={72} height={76} className="loading-gate__logo" priority />
           <span>QDQC</span>
