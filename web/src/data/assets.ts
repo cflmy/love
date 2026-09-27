@@ -13,7 +13,7 @@ export const palette = {
  * Bump when rewriting public/media binaries in place.
  * Same path + new bytes is invisible to next/image & browser caches without this.
  */
-export const MEDIA_REV = "20260927k";
+export const MEDIA_REV = "20260927m";
 
 /** Cache-bust polished media URLs (path stays under public/). */
 export function media(path: string): string {
@@ -137,6 +137,8 @@ export const crops = mediaMap({
   storyQuietTea: "/media/crops/story-quiet-tea.webp",
   storyLetter: "/media/crops/story-letter.webp",
   storyCoda: "/media/crops/story-coda.webp",
+  /** assert/img/Add1 — coda chapters ambient base (我们 → 明天) */
+  add1: "/media/crops/add-1.webp",
 });
 
 /** Transparent subjects / flight / elements — permanent under public/media/parts. */

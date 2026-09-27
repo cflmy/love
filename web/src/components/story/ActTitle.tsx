@@ -14,15 +14,17 @@ export function ActTitle({
 }: {
   id: ChapterId;
   lines?: string[];
-  tone?: "dark" | "light";
+  /** foil = 烫金 hot-stamped gold (Memories over Add1) */
+  tone?: "dark" | "light" | "foil";
   seal?: string;
 }) {
   const chapter = getChapter(id);
   const shown = lines ?? chapter.copy.slice(0, 2);
+  const toneClass = tone === "foil" ? "is-foil" : tone === "light" ? "is-light" : "is-dark";
 
   return (
     <section
-      className={`chapter-panel act-title ${tone === "light" ? "is-light" : "is-dark"}`}
+      className={`chapter-panel act-title ${toneClass}`}
       aria-label={chapter.title}
       data-chapter={id}
     >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FrameImage } from "@/components/ui/FrameImage";
 import { StoryModal } from "@/components/ui/StoryModal";
 import { crops } from "@/data/assets";
@@ -68,13 +68,27 @@ const MEMORIES: MemoryNode[] = [
   },
 ];
 
-/** Split tiles into N columns for staggered upward marquee. */
-function splitColumns(tiles: GalleryTile[], cols: number) {
-  const out: GalleryTile[][] = Array.from({ length: cols }, () => []);
-  tiles.forEach((tile, i) => {
-    out[i % cols]!.push(tile);
-  });
+/** Repeat tiles with unique ids for React keys. */
+function densifyColumn(tiles: GalleryTile[], copies: number): GalleryTile[] {
+  if (tiles.length === 0 || copies <= 1) return tiles;
+  const out: GalleryTile[] = [];
+  for (let c = 0; c < copies; c++) {
+    for (const tile of tiles) {
+      out.push(c === 0 ? tile : { ...tile, id: `${tile.id}__r${c}` });
+    }
+  }
   return out;
+}
+
+/**
+ * Every column gets the full gallery (rotated) so stacks stay long enough
+ * to fill the tall stage — splitting across columns was leaving empty gutters.
+ */
+function buildColumns(tiles: GalleryTile[], cols: number, copies: number) {
+  return Array.from({ length: cols }, (_, ci) => {
+    const rotated = ci === 0 ? tiles : [...tiles.slice(ci), ...tiles.slice(0, ci)];
+    return densifyColumn(rotated, copies);
+  });
 }
 
 /**
@@ -89,6 +103,10 @@ export function MemoriesTimeline() {
   const [tile, setTile] = useState<GalleryTile | null>(null);
   const [paused, setPaused] = useState(false);
   const [colCount, setColCount] = useState(3);
+  /** Extra repeats until each stack ≥ stage height */
+  const [copies, setCopies] = useState(3);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const measureStackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 720px)");
@@ -98,7 +116,32 @@ export function MemoriesTimeline() {
     return () => mq.removeEventListener("change", apply);
   }, []);
 
-  const columns = useMemo(() => splitColumns(MEMORY_WATERFALL, colCount), [colCount]);
+  const columns = useMemo(
+    () => buildColumns(MEMORY_WATERFALL, colCount, copies),
+    [colCount, copies],
+  );
+
+  // Grow copies until one stack fills the stage (fixes tall empty gutters)
+  useLayoutEffect(() => {
+    if (reduced) return;
+    const stage = stageRef.current;
+    const stack = measureStackRef.current;
+    if (!stage || !stack) return;
+
+    const ensureFill = () => {
+      const stageH = stage.clientHeight;
+      const stackH = stack.scrollHeight;
+      if (stageH < 80 || stackH < 40) return;
+      if (stackH < stageH * 1.08) {
+        setCopies((c) => Math.min(c + 1, 8));
+      }
+    };
+
+    ensureFill();
+    const ro = new ResizeObserver(ensureFill);
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [columns, reduced, colCount]);
 
   return (
     <section className="qd-timeline" aria-label="我们">
@@ -122,6 +165,7 @@ export function MemoriesTimeline() {
       </div>
 
       <div
+        ref={stageRef}
         className={`qd-marquee ${paused || reduced ? "is-paused" : ""}`}
         style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
         aria-label="照片瀑布流 · 持续上滚"
@@ -137,7 +181,12 @@ export function MemoriesTimeline() {
             <div className="qd-marquee__track">
               {/* Two identical stacks → translateY(-50%) loops seamlessly */}
               {[0, 1].map((copy) => (
-                <div key={copy} className="qd-marquee__stack" aria-hidden={copy === 1}>
+                <div
+                  key={copy}
+                  ref={ci === 0 && copy === 0 ? measureStackRef : undefined}
+                  className="qd-marquee__stack"
+                  aria-hidden={copy === 1}
+                >
                   {col.map((item) => (
                     <button
                       key={`${copy}-${item.id}`}

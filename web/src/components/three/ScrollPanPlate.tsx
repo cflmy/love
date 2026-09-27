@@ -19,7 +19,7 @@ function textureAspect(url: string, texture: THREE.Texture) {
   return 16 / 9;
 }
 
-export type RevealMode = "cover" | "fitGrow" | "scan" | "snake";
+export type RevealMode = "cover" | "fitGrow" | "scan" | "snake" | "curtain";
 
 /**
  * Full-bleed backdrop that keeps intrinsic aspect (no stretch).
@@ -28,6 +28,8 @@ export type RevealMode = "cover" | "fitGrow" | "scan" | "snake";
  * - scan: cover with forced L→R / T→B ken-burns scan
  * - snake: calm left-column → right → faces
  */
+export type PanFocus = { x: number; y: number };
+
 export function ScrollPanPlate({
   url,
   progress,
@@ -41,6 +43,12 @@ export function ScrollPanPlate({
   damp = 2.8,
   color,
   depthWrite = false,
+  /**
+   * Normalized image focus 0=left/top → 1=right/bottom.
+   * When set, scan/cover drift between `focus` and `focusEnd` (defaults to same).
+   */
+  focus,
+  focusEnd,
 }: {
   url: string;
   progress: number;
@@ -53,6 +61,8 @@ export function ScrollPanPlate({
   damp?: number;
   color?: string;
   depthWrite?: boolean;
+  focus?: PanFocus;
+  focusEnd?: PanFocus;
 }) {
   const mesh = useRef<THREE.Mesh>(null);
   const { camera, size } = useThree();
@@ -112,17 +122,47 @@ export function ScrollPanPlate({
       tx = THREE.MathUtils.lerp(overflowX * 0.42, -overflowX * 0.48, scan);
       ty = y + THREE.MathUtils.lerp(-overflowY * 0.4, overflowY * 0.42, scan);
       snap = t < 0.04;
+    } else if (reveal === "curtain") {
+      /**
+       * 幕布: full art (contain) first → grow into cover → pan focus→focusEnd.
+       * Default pan BR→TL when focus omitted.
+       */
+      const grow = THREE.MathUtils.smoothstep(t, 0.28, 0.62);
+      const pan = THREE.MathUtils.smoothstep(t, 0.48, 1);
+      const coverMul = 1.32;
+      // Slight breath while the full curtain holds
+      const holdScale = 1 + THREE.MathUtils.smoothstep(t, 0.05, 0.22) * 0.04 * (1 - grow);
+      planeW = THREE.MathUtils.lerp(fitW * holdScale, coverW * coverMul, grow);
+      planeH = THREE.MathUtils.lerp(fitH * holdScale, coverH * coverMul, grow);
+      const overflowX = Math.max(0, planeW - visibleW);
+      const overflowY = Math.max(0, planeH - visibleH);
+      const from = focus ?? { x: 0.9, y: 0.88 };
+      const to = focusEnd ?? { x: 0.04, y: 0.06 };
+      // Full-show: center (overflow≈0). After grow: pan along focus path.
+      const fx = THREE.MathUtils.lerp(0.5, THREE.MathUtils.lerp(from.x, to.x, pan), grow);
+      const fy = THREE.MathUtils.lerp(0.5, THREE.MathUtils.lerp(from.y, to.y, pan), grow);
+      tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, fx);
+      ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, fy);
+      snap = t < 0.06;
     } else if (reveal === "scan") {
-      // Hold TL briefly so chapter enter / era flash never land mid-pan
+      // Hold at focus start briefly so chapter enter never lands mid-pan
       const hold = 0.14;
       const scan = THREE.MathUtils.smoothstep(Math.max(0, (t - hold) / (1 - hold)), 0, 1);
       planeW = coverW * 1.2;
       planeH = coverH * 1.2;
       const overflowX = Math.max(0, planeW - visibleW);
       const overflowY = Math.max(0, planeH - visibleH);
-      tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, scan);
-      // +Y is up in Three — top of texture needs negative offset
-      ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, scan);
+      if (focus) {
+        const end = focusEnd ?? focus;
+        const fx = THREE.MathUtils.lerp(focus.x, end.x, scan);
+        const fy = THREE.MathUtils.lerp(focus.y, end.y, scan);
+        tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, fx);
+        ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, fy);
+      } else {
+        tx = THREE.MathUtils.lerp(overflowX * 0.5, -overflowX * 0.5, scan);
+        // +Y is up in Three — top of texture needs negative offset
+        ty = y + THREE.MathUtils.lerp(-overflowY * 0.5, overflowY * 0.5, scan);
+      }
       snap = t <= hold;
     } else if (reveal === "snake") {
       const focus = snakeScan(t, LIFE_MEET_SNAKE);

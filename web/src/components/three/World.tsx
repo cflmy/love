@@ -15,6 +15,11 @@ import {
   presentPlateOpacity,
   presentPlateT,
 } from "@/data/presentShots";
+import {
+  JOURNEY_STILLS,
+  journeyPlateOpacity,
+  journeyPlateT,
+} from "@/data/journeyShots";
 import { useStoryStore } from "@/store/story";
 import { CinematicPanel, DoorPanel, ScrollPanPlate } from "./ScrollPanPlate";
 
@@ -312,52 +317,101 @@ function PastRealm() {
 }
 
 /**
- * 今世缘起 underlay — soft base under the 14/15 carousel,
- * then carries through journey / memories / quiet-days so black acts
- * never fall back to a void.
+ * Soft bases per act — never reuse 今世缘起 after present ends.
+ * · present → lifeMeet
+ * · journey → roadBeforeSunset「你别担心，太阳落山前我一定回来」
+ * Add1 幕布 = DOM EraFlash; soft backdrop = Add1Backdrop after 我们 opens.
  */
-function OriginUnderlay() {
+function ChapterUnderlays() {
   const present = useChapterLocal("present");
+  const journey = useChapterLocal("journey");
+  const reveal = useStoryStore((s) => s.worldReveal);
+
+  const presentOp =
+    reveal *
+    THREE.MathUtils.smoothstep(present, 0.01, 0.05) *
+    leaveBand(present, 0.97, 1) *
+    0.38;
+
+  // Hold until EraFlash Add1 幕布 (journey local > 0.96) takes the seam
+  const journeyOp =
+    reveal *
+    THREE.MathUtils.smoothstep(journey, 0.01, 0.08) *
+    leaveBand(journey, 0.95, 0.995) *
+    0.52;
+
+  return (
+    <group>
+      {presentOp > 0.02 ? (
+        <ScrollPanPlate
+          url={crops.lifeMeet}
+          progress={THREE.MathUtils.clamp(present, 0, 1)}
+          z={-8.6}
+          y={0.02}
+          opacity={presentOp}
+          cover={1.28}
+          reveal="snake"
+          damp={1.8}
+          color="#c8b896"
+        />
+      ) : null}
+      {journeyOp > 0.02 ? (
+        <ScrollPanPlate
+          url={crops.roadBeforeSunset}
+          progress={0.2 + journey * 0.55}
+          z={-8.5}
+          y={0.04}
+          opacity={journeyOp}
+          cover={1.24}
+          reveal="scan"
+          damp={1.9}
+          color="#c4a070"
+        />
+      ) : null}
+    </group>
+  );
+}
+
+/**
+ * Add1 背景 — keep the good establish framing, nudge gently to top-left.
+ * 幕布 seam flash stays in DOM EraFlash. No long BR→TL journey.
+ */
+function Add1Backdrop() {
   const journey = useChapterLocal("journey");
   const memories = useChapterLocal("memories");
   const quiet = useChapterLocal("quiet-days");
+  const letter = useChapterLocal("letter");
+  const future = useChapterLocal("future");
   const reveal = useStoryStore((s) => s.worldReveal);
 
-  const inPresent =
-    THREE.MathUtils.smoothstep(present, 0.01, 0.05) * leaveBand(present, 0.97, 1);
-  const inJourney =
-    THREE.MathUtils.smoothstep(journey, 0.01, 0.1) * leaveBand(journey, 0.9, 0.99);
+  const warm = journey > 0.88 || memories > 0.001;
+  if (!warm) return null;
+
   const inMemories =
-    THREE.MathUtils.smoothstep(memories, 0.02, 0.12) * leaveBand(memories, 0.88, 0.98);
-  const inQuiet =
-    THREE.MathUtils.smoothstep(quiet, 0.02, 0.14) * leaveBand(quiet, 0.85, 0.96);
+    THREE.MathUtils.smoothstep(memories, 0.05, 0.14) * leaveBand(memories, 0.9, 0.98);
+  const inCoda =
+    THREE.MathUtils.smoothstep(Math.max(quiet, letter, future), 0.02, 0.12) *
+    leaveBand(future, 0.88, 0.98) *
+    0.55;
 
-  // Soft during present (plates sit in front); stronger in later dark acts
-  const opacity =
-    reveal *
-    (inPresent * 0.38 + inJourney * 0.48 + inMemories * 0.32 + inQuiet * 0.28);
-
-  if (opacity < 0.02) return null;
-
-  // Slow breath scan — never frantic under later chapters
-  const progress =
-    present > 0.01
-      ? THREE.MathUtils.clamp(present, 0, 1)
-      : journey > 0.01
-        ? 0.35 + journey * 0.4
-        : 0.45 + Math.max(memories, quiet) * 0.3;
+  const opacity = reveal * (inMemories * 0.56 + inCoda * 0.3);
+  // Soft breath only — stay in the left-top desk / daisy core
+  const progress = THREE.MathUtils.clamp(memories * 0.55, 0, 1);
 
   return (
     <ScrollPanPlate
-      url={crops.lifeMeet}
+      url={crops.add1}
       progress={progress}
-      z={-8.6}
+      z={-8.3}
       y={0.02}
       opacity={opacity}
-      cover={1.28}
-      reveal="snake"
+      cover={1.22}
+      reveal="scan"
       damp={1.8}
-      color="#c8b896"
+      color="#e8d8b0"
+      /* Current good frame → slight settle into top-left */
+      focus={{ x: 0.36, y: 0.32 }}
+      focusEnd={{ x: 0.16, y: 0.12 }}
     />
   );
 }
@@ -409,30 +463,49 @@ function PresentRealm() {
   );
 }
 
-/** Journey climax stills — keep sunset push; 缘起 underlay fills the voids. */
-function JourneyAtmosphere() {
+/**
+ * Act 10 · 山高路远 — Three.js sheets 16→17→18 carousel.
+ * Spatial stills; captions stay in DOM JourneyChapter.
+ */
+function JourneyRealm() {
+  const present = useChapterLocal("present");
   const journey = useChapterLocal("journey");
   const reveal = useStoryStore((s) => s.worldReveal);
+  const reduced = useStoryStore((s) => s.reducedMotion);
 
-  const journeyOp =
-    THREE.MathUtils.smoothstep(journey, 0.08, 0.2) *
-    (1 - THREE.MathUtils.smoothstep(journey, 0.55, 0.72)) *
-    0.42 *
-    reveal;
+  // Hold until EraFlash Add1 幕布 at journey → 我们 seam
+  const gate =
+    reveal *
+    THREE.MathUtils.smoothstep(journey, 0.008, 0.04) *
+    leaveBand(journey, 0.95, 0.995);
 
-  if (journeyOp < 0.02) return null;
+  // Preload near end of 今世 so first road plate does not suspend
+  const warm = present > 0.85 || journey > 0.001;
+  if (!warm) return null;
+
+  const fade = reduced ? 0.03 : 0.05;
 
   return (
-    <ScrollPanPlate
-      url={crops.roadBeforeSunset}
-      progress={journey}
-      z={-7.2}
-      y={0.05}
-      opacity={journeyOp}
-      cover={1.22}
-      reveal="scan"
-      damp={2.0}
-    />
+    <group position={[0, 0.02, 0]}>
+      {JOURNEY_STILLS.map((still, i) => {
+        const op = gate * journeyPlateOpacity(journey, still.start, still.end, fade);
+        const t = journeyPlateT(journey, still.start, still.end);
+        const damp = (still.damp ?? 2.1) * (reduced ? 1.6 : 1) + i * 0.015;
+        return (
+          <ScrollPanPlate
+            key={still.id}
+            url={still.url}
+            progress={t}
+            z={still.z}
+            y={still.y ?? 0}
+            opacity={op}
+            cover={still.cover ?? 1.15}
+            reveal={still.reveal}
+            damp={damp}
+          />
+        );
+      })}
+    </group>
   );
 }
 
@@ -571,9 +644,10 @@ export function QDQCWorld() {
         <PastRealm />
       </Suspense>
       <Suspense fallback={null}>
-        <OriginUnderlay />
+        <ChapterUnderlays />
         <PresentRealm />
-        <JourneyAtmosphere />
+        <JourneyRealm />
+        <Add1Backdrop />
       </Suspense>
     </>
   );

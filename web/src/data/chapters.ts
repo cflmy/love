@@ -110,7 +110,8 @@ export const chapters: Chapter[] = [
     title: "我们",
     subtitle: "Memories",
     navLabel: "05 我们",
-    scrollSpan: 3.2,
+    /** ≈ title + lantern rail + ~92vh marquee — keep in sync with DOM height */
+    scrollSpan: 2.0,
     themeTrack: "quietDays",
     color: "#6F8FB7",
     copy: ["每一盏灯，都是一次记得。", "这些平凡的瞬间，拼成我们。"],

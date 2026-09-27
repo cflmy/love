@@ -1,5 +1,6 @@
 /** Intrinsic pixel sizes for committed public/media assets. */
 export const imageSize: Record<string, { w: number; h: number }> = {
+  "/media/crops/add-1.webp": { w: 1536, h: 1024 },
   "/media/crops/bridge-dusk.webp": { w: 245, h: 113 },
   "/media/crops/bridge-full.webp": { w: 895, h: 734 },
   "/media/crops/bridge-morning.webp": { w: 247, h: 111 },

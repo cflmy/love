@@ -58,7 +58,7 @@ export function StoryChapters() {
         aria-label="我们"
         style={{ minHeight: memoriesH }}
       >
-        <ActTitle id="memories" tone="light" />
+        <ActTitle id="memories" tone="foil" />
         <MemoriesTimeline />
       </section>
 
