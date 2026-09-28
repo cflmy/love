@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:public": "node scripts/deploy-public.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
